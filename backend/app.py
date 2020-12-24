@@ -1,4 +1,4 @@
-from flask import Flask, request, Response, jsonify
+from flask import Flask, request, jsonify
 import secrets
 
 import firebase_admin
@@ -14,13 +14,13 @@ app = Flask(__name__)
 @app.route('/workspace', methods=['POST'])
 def create_workspace():
     data = request.get_json()
-    if not data or "pwd" not in data:
-        return Response("Password needed to create a new workspace", status=400)
+    if not data or "pwd" not in data or "name" not in data:
+        return "Password and name needed to create a new workspace", 400
     
     unique_id = secrets.token_urlsafe(8)
     env = db.collection(unique_id)
     env.document("init").set(data)
-    return Response(unique_id, status=200)
+    return unique_id, 200
 
 
 def delete_collection(coll_ref, batch_size):
@@ -38,20 +38,31 @@ def delete_collection(coll_ref, batch_size):
 @app.route('/workspace', methods=['DELETE'])
 def delete_workspace():
     data = request.get_json()
-    if not data or "pwd" not in data or "env" not in data:
-        return Response("Password and key needed to delete workspace", status=400)
+    if not data or "pwd" not in data or "key" not in data:
+        return "Password and key needed to delete workspace", 400
     
-    env = db.collection(data['env'])
-    pwd = env.document('init').get().to_dict()['pwd']
+    key = db.collection(data['key'])
+    pwd = key.document('init').get().to_dict()['pwd']
     if pwd != data['pwd']:
-        return Response("Incorrect password", status=403)
-    delete_collection(env, 10)
-    return Response(status=200)
+        return "Incorrect password", 403
+    
+    delete_collection(key, 10)
+    return '', 200
 
 
 @app.route('/link', methods=['GET'])
 def get_all_link():
-    pass
+    data = request.get_json()
+    if not data or "key" not in data:
+        return "Key needed to delete workspace", 400
+    
+    docs = db.collection(data['key']).stream()
+    
+    for doc in docs:
+        if doc.id == "init":
+            continue
+        print(f'{doc.id} => {doc.to_dict()}')
+    return '', 200
 
 
 @app.route('/link', methods=['POST'])
