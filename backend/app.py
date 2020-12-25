@@ -4,7 +4,6 @@ import secrets
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-
 cred = credentials.Certificate("serviceAccount.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
@@ -20,7 +19,7 @@ def create_workspace():
     unique_id = secrets.token_urlsafe(8)
     env = db.collection(unique_id)
     env.document("init").set(data)
-    return unique_id, 200
+    return jsonify({'key': unique_id}), 200
 
 
 def delete_collection(coll_ref, batch_size):
@@ -58,26 +57,46 @@ def get_all_link():
     
     docs = db.collection(data['key']).stream()
     
+    links = []
+    return_json = {}
     for doc in docs:
         if doc.id == "init":
+            return_json['workplace'] = doc.to_dict()['name']
             continue
-        print(f'{doc.id} => {doc.to_dict()}')
-    return '', 200
+        
+        d = doc.to_dict()
+        d['docID'] = doc.id
+        links.append(d)
+    
+    return_json['links'] = links
+    return jsonify(return_json), 200
 
 
 @app.route('/link', methods=['POST'])
 def create_link():
-    pass
+    data = request.get_json()
+    if not data or "key" not in data:
+        return "Key needed to delete workspace", 400
+    
+    env = db.collection(data['key'])
+    env.document().set(data['link'])
+    return '', 200
 
 
+# TODO
 @app.route('/link', methods=['PUT'])
 def update_link():
-    pass
+    data = request.get_json()
+    if not data or "key" not in data or "docID" not in data:
+        return "Key and docID are needed to update link", 400
 
 
+# TODO
 @app.route('/link', methods=['DELETE'])
 def delete_link():
-    pass
+    data = request.get_json()
+    if not data or "key" not in data or "docID" not in data:
+        return "Key and docID are needed to delete link", 400
 
 
 if __name__ == '__main__':
