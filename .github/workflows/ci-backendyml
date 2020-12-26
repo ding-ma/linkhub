@@ -28,5 +28,5 @@ jobs:
       working-directory: ./backend
     - name: Test with pytest
       run: |
-        pytest
+        pytest --cov --cov-fail-under=85
       working-directory: ./backend
