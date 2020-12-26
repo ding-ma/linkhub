@@ -3,7 +3,8 @@ name: CD Backend
 
 on: [push]
 
-
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
 
 jobs:
   build:
@@ -39,7 +40,7 @@ jobs:
       - name: Build Docker Image
         run: |-
           docker build \
-            --tag "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA" \
+            --tag "gcr.io/$GCP_PROJECT/$IMAGE:$GITHUB_SHA" \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
             --build-arg GITHUB_REF="$GITHUB_REF" \
             .
@@ -48,4 +49,4 @@ jobs:
       # Push the Docker image to Google Container Registry
       - name: Publish Docker Image
         run: |-
-          docker push "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA"
+          docker push "gcr.io/$GCP_PROJECT/$IMAGE:$GITHUB_SHA"
