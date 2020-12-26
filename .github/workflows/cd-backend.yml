@@ -30,17 +30,17 @@ jobs:
       - name: Setup Docker and SA Key
         run: |-
           gcloud --quiet auth configure-docker
-          echo $TEST_ACCOUNT >> serviceAccount.json
+          echo $SA_ACCOUNT >> serviceAccount.json
         shell: bash
         env:
-          TEST_ACCOUNT: ${{secrets.FIREBASE_SERVICE_ACCOUNT}}
+          SA_ACCOUNT: ${{secrets.FIREBASE_SERVICE_ACCOUNT}}
         working-directory: ./backend
         
       # Build the Docker image
       - name: Build Docker Image
         run: |-
           docker build \
-            --tag "gcr.io/$GCP_PROJECT/$IMAGE:$GITHUB_SHA" \
+            --tag "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA" \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
             --build-arg GITHUB_REF="$GITHUB_REF" \
             .
@@ -49,4 +49,4 @@ jobs:
       # Push the Docker image to Google Container Registry
       - name: Publish Docker Image
         run: |-
-          docker push "gcr.io/$GCP_PROJECT/$IMAGE:$GITHUB_SHA"
+          docker push "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA"
