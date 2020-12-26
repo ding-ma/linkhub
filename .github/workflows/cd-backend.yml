@@ -25,6 +25,7 @@ jobs:
         with:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           project_id: ${{ secrets.GCP_PROJECT }}
+          export_default_credentials: true
 
       # Configure Docker to use the gcloud command-line tool as a credential
       # helper for authentication
@@ -37,18 +38,20 @@ jobs:
         env:
           SA_ACCOUNT: ${{secrets.FIREBASE_SERVICE_ACCOUNT}}
         working-directory: ./backend
-        
-      # Build the Docker image
-      - name: Build Docker Image
-        run: |-
-          docker build \
-            --tag "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA" \
-            --build-arg GITHUB_SHA="$GITHUB_SHA" \
-            --build-arg GITHUB_REF="$GITHUB_REF" \
-            .
-        working-directory: ./backend
 
-      # Push the Docker image to Google Container Registry
-      - name: Publish Docker Image
-        run: |-
-          docker push "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA"
+
+      # Build the Docker image
+      - name: Build & Publish
+        run: |
+          gcloud config set project ${{ secrets.GCP_PROJECT }}
+          gcloud builds submit --tag gcr.io/${{ secrets.GCP_PROJECT }}/$IMAGE
+          gcloud config set run/region us-central1
+        working-directory: ./backend
+      
+      # Deploy the Docker image to the GKE cluster
+      - name: Deploy
+        run: |
+          gcloud run deploy $IMAGE --image gcr.io/${{ secrets.GCP_PROJECT }}/$IMAGE \
+          --platform managed \
+          --allow-unauthenticated \
+          --memory 512M
