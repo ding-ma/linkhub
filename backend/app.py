@@ -44,6 +44,10 @@ def delete_workspace():
         return "Password and key needed to delete workspace", 400
     
     key = db.collection(data['key'])
+    
+    if not key.document('init').get().exists:
+        return "This workspace does not exist", 400
+    
     pwd = key.document('init').get().to_dict()['pwd']
     if pwd != data['pwd']:
         return "Incorrect password", 403
@@ -81,14 +85,15 @@ def get_all_link():
 def create_link():
     data = request.get_json()
     if not data or "key" not in data:
-        return "Key needed to delete workspace", 400
+        return "Key needed to create workspace", 400
 
     wk = db.collection(data['key'])
     if not wk.document('init').get().exists:
         return "Workspace must be created before adding a link", 400
 
-    wk.document().set(data['link'])
-    return '', 200
+    link_id = wk.document()
+    link_id.set(data['link'])
+    return jsonify({"docID": link_id.id}), 200
 
 
 @app.route('/link', methods=['PUT'])
