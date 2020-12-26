@@ -5,6 +5,7 @@ on: [push]
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT }}
+  IMAGE: linkhub-backend
 
 jobs:
   build:
