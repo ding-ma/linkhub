@@ -3,10 +3,13 @@ import secrets
 
 import firebase_admin
 from firebase_admin import credentials, firestore
+from config import create_db
+from dotenv import load_dotenv
 
+load_dotenv('.env')
 cred = credentials.Certificate("serviceAccount.json")
 firebase_admin.initialize_app(cred)
-db = firestore.client()
+db = create_db()
 app = Flask(__name__)
 
 
@@ -77,6 +80,8 @@ def create_link():
     data = request.get_json()
     if not data or "key" not in data:
         return "Key needed to delete workspace", 400
+    
+    # todo check if document exists
     
     env = db.collection(data['key'])
     env.document().set(data['link'])
