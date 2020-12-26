@@ -12,6 +12,9 @@ def get_env_variable(name):
 
 
 def create_db():
+    """
+    :return: database instance based on environment variable
+    """
     if get_env_variable('DB_SETTING') == 'PROD':
         return firestore.client()
     elif get_env_variable('DB_SETTING') == 'TEST':
