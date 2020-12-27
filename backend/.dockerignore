@@ -1,0 +1,8 @@
+.coverage*
+venv/
+tests/
+pytest.ini
+.pytest_cache
+.idea/
+firestore-debug.log
+__pycache__
