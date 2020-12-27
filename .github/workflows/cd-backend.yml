@@ -54,7 +54,5 @@ jobs:
           docker push "gcr.io/$PROJECT_ID/$IMAGE"
       
       - name: Deploy to Cloud Run
-        uses: google-github-actions/deploy-cloudrun@main
-        with:
-          image: gcr.io/$PROJECT_ID/$IMAGE
-          service: $IMAGE
+        run: |-
+          gcloud run deploy $IMAGE --image="gcr.io/$PROJECT_ID/$IMAGE" --max-instances=2 --memory=512Mi --allow-unauthenticated
