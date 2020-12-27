@@ -17,7 +17,7 @@ RUN pip install -r requirements.txt
 RUN pip install Flask gunicorn
 ENV PORT 8080
 
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 app:app
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 main:app
 # # CMD gunicorn  main:app -w 2 --threads 2 -b 0.0.0.0:8080
 # FROM python:3.7-stretch
 # RUN apt-get update -y
