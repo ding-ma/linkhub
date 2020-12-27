@@ -1,5 +1,7 @@
 import React, { useEffect } from "react";
 import "./Popup.scss";
+import Link from "./components/Link";
+import Header from "./components/Header";
 
 export default function Popup() {
   useEffect(() => {
@@ -7,5 +9,11 @@ export default function Popup() {
     chrome.runtime.sendMessage({ popupMounted: true });
   }, []);
 
-  return <div className="popupContainer">Hello, world!</div>;
+
+  return(
+      <div className="popupContainer">
+          <Header/>
+          <Link/>
+      </div>
+  );
 }
