@@ -1,0 +1,58 @@
+name: CD Backend
+
+on: [push]
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
+  IMAGE: linkhub-backend
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      # Setup gcloud CLI
+      - uses: google-github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT }}
+          export_default_credentials: true
+
+      # Configure Docker to use the gcloud command-line tool as a credential
+      # helper for authentication
+      - name: Setup Docker and SA Key
+        run: |-
+          gcloud --quiet auth configure-docker
+          echo $SA_ACCOUNT >> serviceAccount.json
+          echo "DB_SETTING=\"PROD\"" >> .env
+        shell: bash
+        env:
+          SA_ACCOUNT: ${{secrets.FIREBASE_SERVICE_ACCOUNT}}
+        working-directory: ./backend
+        
+      # Build the Docker image
+      - name: Build Docker Image
+        run: |-
+          docker build \
+            --tag "gcr.io/$PROJECT_ID/$IMAGE" \
+            --build-arg GITHUB_SHA="$GITHUB_SHA" \
+            --build-arg GITHUB_REF="$GITHUB_REF" \
+            .
+        working-directory: ./backend
+
+      # Push the Docker image to Google Container Registry
+      - name: Publish Docker Image
+        run: |-
+          docker push "gcr.io/$PROJECT_ID/$IMAGE"
+      
+      - name: Deploy to Cloud Run
+        run: |-
+          gcloud run deploy $IMAGE --image="gcr.io/$PROJECT_ID/$IMAGE" --max-instances=2 --memory=512Mi --allow-unauthenticated --platform=managed --region=us-central1 --port=5000
