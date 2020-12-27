@@ -14,11 +14,6 @@ db = create_db()
 app = Flask(__name__)
 
 
-@app.route('/')
-def hello():
-    return "hello"
-
-
 @app.route('/workspace', methods=['POST'])
 def create_workspace():
     data = request.get_json()
@@ -64,11 +59,11 @@ def delete_workspace():
 
 @app.route('/link', methods=['GET'])
 def get_all_link():
-    data = request.get_json()
-    if not data or "key" not in data:
+    key = request.args.get('key')
+    if not key:
         return "Key needed to get links from workspace", 400
     
-    docs = db.collection(data['key'])
+    docs = db.collection(key)
     if not docs.document('init').get().exists:
         return "Workspace must be created before getting links", 400
     
@@ -92,11 +87,11 @@ def create_link():
     data = request.get_json()
     if not data or "key" not in data:
         return "Key needed to create workspace", 400
-
+    
     wk = db.collection(data['key'])
     if not wk.document('init').get().exists:
         return "Workspace must be created before adding a link", 400
-
+    
     link_id = wk.document()
     link_id.set(data['link'])
     return jsonify({"docID": link_id.id}), 200
@@ -107,25 +102,25 @@ def update_link():
     data = request.get_json()
     if not data or "key" not in data or "docID" not in data:
         return "Key and docID are needed to update link", 400
-
+    
     wk = db.collection(data['key'])
     if not wk.document('init').get().exists:
         return "Workspace must be created before updating a link", 400
-
+    
     wk.document(data['docID']).set(data['update'])
     return '', 200
-    
+
 
 @app.route('/link', methods=['DELETE'])
 def delete_link():
     data = request.get_json()
     if not data or "key" not in data or "docID" not in data:
         return "Key and docID are needed to delete link", 400
-
+    
     wk = db.collection(data['key'])
     if not wk.document('init').get().exists:
         return "Workspace must be created before deleting a link", 400
-
+    
     wk.document(data['docID']).delete()
     return '', 200
 

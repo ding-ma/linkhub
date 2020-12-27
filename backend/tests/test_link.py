@@ -27,14 +27,14 @@ def test_get_link_no_body(app, client):
 
 
 def test_get_link_no_workspace(app, client):
-    res = client.get('/link', json={"key": "somekey"}, content_type=SEND_JSON)
+    res = client.get('/link', query_string={"key": "somekey"})
     msg = byte_to_string(res.data)
     assert res.status_code == 400 and "Workspace must be created before getting links" in msg
 
 
 def test_get_link_empty_workspace(app, client):
     wk = create_workspace(client)
-    res = client.get('/link', json={"key": wk}, content_type=SEND_JSON)
+    res = client.get('/link', query_string={"key": wk})
     msg = byte_to_dict(res.data)
     assert res.status_code == 200 and not msg['links']
 
@@ -43,7 +43,7 @@ def test_get_link(app, client):
     wk = create_workspace(client)
     TEST_LINK_1['key'] = wk
     create_link(client, TEST_LINK_1)
-    res = client.get('/link', json={"key": wk}, content_type=SEND_JSON)
+    res = client.get('/link', query_string={"key": wk})
     msg = byte_to_dict(res.data)
     assert res.status_code == 200 and len(msg['links']) == 1 and assert_key_in_list("LINK_ONE", msg['links'])
 
@@ -56,7 +56,7 @@ def test_get_two_links(app, client):
     TEST_LINK_2['key'] = wk
     create_link(client, TEST_LINK_2)
     
-    res = client.get('/link', json={"key": wk}, content_type=SEND_JSON)
+    res = client.get('/link', query_string={"key": wk})
     msg = byte_to_dict(res.data)
     assert res.status_code == 200 and len(msg['links']) == 2 and \
            assert_key_in_list("LINK_ONE", msg['links']) and assert_key_in_list("LINK_TWO", msg['links'])
@@ -85,7 +85,7 @@ def test_update_link(app, client):
     res = client.put('/link', json=UPDATE_LINK_1, content_type=SEND_JSON)
     assert res.status_code == 200
     
-    res = client.get('/link', json={"key": wk}, content_type=SEND_JSON)
+    res = client.get('/link', query_string={"key": wk})
     msg = byte_to_dict(res.data)
     assert assert_key_in_list("NEW_LINK_ONE", msg['links']) and res.status_code == 200
 
@@ -110,6 +110,6 @@ def test_delete_link(app, client):
     res = client.delete('/link', json={"key": wk, "docID": doc_id}, content_type=SEND_JSON)
     assert res.status_code == 200
     
-    res = client.get('/link', json={"key": wk}, content_type=SEND_JSON)
+    res = client.get('/link', query_string={"key": wk})
     msg = byte_to_dict(res.data)
     assert res.status_code == 200 and not msg['links']
