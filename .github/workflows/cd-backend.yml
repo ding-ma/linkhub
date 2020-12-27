@@ -42,7 +42,7 @@ jobs:
       - name: Build Docker Image
         run: |-
           docker build \
-            --tag "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA" \
+            --tag "gcr.io/$PROJECT_ID/$IMAGE" \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
             --build-arg GITHUB_REF="$GITHUB_REF" \
             .
@@ -51,10 +51,10 @@ jobs:
       # Push the Docker image to Google Container Registry
       - name: Publish Docker Image
         run: |-
-          docker push "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA"
+          docker push "gcr.io/$PROJECT_ID/$IMAGE"
       
-      - id: Deploy
+      - name: Deploy to Cloud Run
         uses: google-github-actions/deploy-cloudrun@main
         with:
-          image: "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA"
+          image: gcr.io/$PROJECT_ID/$IMAGE
           service: $IMAGE
