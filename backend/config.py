@@ -21,3 +21,5 @@ def create_db():
         return MockFirestore()
     else:
         raise Exception("Invalid database setting")
+
+# some test commit
