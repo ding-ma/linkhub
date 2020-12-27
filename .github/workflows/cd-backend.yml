@@ -1,6 +1,18 @@
 name: CD Backend
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "./backend"
+  workflow_run:
+    workflows:
+      - "CI Backend"
+    branches:
+      - master
+    types:
+      - completed
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT }}
