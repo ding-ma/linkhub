@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - master
-    paths:
-      - "./backend"
   workflow_run:
     workflows:
       - "CI Backend"
