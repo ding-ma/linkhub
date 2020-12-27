@@ -1,28 +1,28 @@
-FROM python:3.9-slim
-
-RUN apt-get update -y
-RUN apt-get install -y python-pip python-dev build-essential
-
-# ENV TZ=America/Toronto
-
-
-# Allow statements and log messages to immediately appear in the Knative logs
-ENV PYTHONUNBUFFERED True
-
-# Copy local code to the container image.
-COPY . /app
-WORKDIR /app
-
-RUN pip install -r requirements.txt
-RUN pip install Flask gunicorn
-
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
-# # CMD gunicorn  main:app -w 2 --threads 2 -b 0.0.0.0:8080
-# FROM python:3.7-stretch
+# FROM python:3.9-slim
+#
 # RUN apt-get update -y
 # RUN apt-get install -y python-pip python-dev build-essential
+#
+# # ENV TZ=America/Toronto
+#
+#
+# # Allow statements and log messages to immediately appear in the Knative logs
+# ENV PYTHONUNBUFFERED True
+#
+# # Copy local code to the container image.
 # COPY . /app
 # WORKDIR /app
+#
 # RUN pip install -r requirements.txt
-# ENTRYPOINT ["python"]
-# CMD ["app.py"]
+# RUN pip install Flask gunicorn
+#
+# CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 100 main:app
+# # CMD gunicorn  main:app -w 2 --threads 2 -b 0.0.0.0:8080
+FROM python:3.9-slim
+RUN apt-get update -y
+RUN apt-get install -y python-pip python-dev build-essential
+COPY . /app
+WORKDIR /app
+RUN pip install -r requirements.txt
+ENTRYPOINT ["python"]
+CMD ["main.py"]
