@@ -5,12 +5,18 @@ import firebase_admin
 from firebase_admin import credentials
 from config import create_db
 from dotenv import load_dotenv
+import os
 
 load_dotenv('.env')
 cred = credentials.Certificate("serviceAccount.json")
 firebase_admin.initialize_app(cred)
 db = create_db()
 app = Flask(__name__)
+
+
+@app.route('/')
+def hello():
+    return "hello"
 
 
 @app.route('/workspace', methods=['POST'])
@@ -125,4 +131,4 @@ def delete_link():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(threaded=True, host='0.0.0.0', port=int(os.environ.get("PORT", 8080)))

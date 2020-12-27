@@ -55,4 +55,4 @@ jobs:
       
       - name: Deploy to Cloud Run
         run: |-
-          gcloud run deploy $IMAGE --image="gcr.io/$PROJECT_ID/$IMAGE" --max-instances=2 --memory=512Mi --allow-unauthenticated --platform=managed --region=us-central1 --port=5000
+          gcloud run deploy $IMAGE --image="gcr.io/$PROJECT_ID/$IMAGE" --max-instances=2 --memory=512Mi --allow-unauthenticated --platform=managed --region=us-central1
