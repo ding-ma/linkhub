@@ -2,25 +2,23 @@ import json
 
 TEST_WORKSPACE = {'pwd': '123', 'name': 'tester'}
 TEST_LINK_1 = {
-    "link": {
-        "LINK_ONE": "https://www.youtube.com/"
-    }
+    
+    "link": "https://www.youtube.com/",
+    "name": "yt link"
+    
 }
 UPDATE_LINK_1 = {
-    "update": {
-        "NEW_LINK_ONE": "https://www.facebook.com/"
-    }
+    "name": "NEW_LINK_ONE",
+    "link": "https://www.facebook.com/"
 }
 
 TEST_LINK_2 = {
-    "link": {
-        "LINK_TWO": "https://www.google.ca/"
-    }
+    "link": "https://www.google.ca/",
+    "name": "gg link"
 }
 UPDATE_LINK_2 = {
-    "update": {
-        "NEW_LINK_ONE": "http://ssense.com/"
-    }
+    "name": "NEW_LINK_ONE",
+    "link": "http://ssense.com/"
 }
 
 SEND_JSON = "application/json"
@@ -47,9 +45,9 @@ def create_link(client, link):
     return byte_to_dict(res.data)['docID']
 
 
-def assert_key_in_list(key, lst):
+def assert_key_in_list(val, lst):
     for e in lst:
-        if key in e:
+        if val in e.values():
             return True
     
     return False

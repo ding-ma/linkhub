@@ -44,8 +44,9 @@ Return sample
 {
     "links": [
         {
-            "NAME_1": "LINK_1",
-            "docID": "LINK_ID"
+            "name": "awesome link",
+            "link: "example.com"
+            "docID": "ID_OF_LINK"
         }
         {...}
     ],
@@ -58,9 +59,8 @@ Return sample
 ```
 {
     "key":"KEY_OF_WORKSPACE",
-    "link":{
-        "NAME_OF_LINK":"LINK"
-    }
+    "link": "link to save"
+    "name":"link name",
 }
 ```
 
@@ -68,11 +68,10 @@ Return sample
 `PUT /link`
 ```
 {
-    "update":{
-        "NAME_TO_UPDATE": "LINK_TO_UPDATE"
-    },
     "docID": "ID_OF_LINK",
-    "key": "KEY_OF_WORKSPACE"
+    "key": "KEY_OF_WORKSPACE",
+    "name": "updated name",
+    "link": "updated link"
 }
 ```
 

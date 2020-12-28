@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import secrets
+from flask_cors import CORS
 
 import firebase_admin
 from firebase_admin import credentials
@@ -12,6 +13,7 @@ cred = credentials.Certificate("serviceAccount.json")
 firebase_admin.initialize_app(cred)
 db = create_db()
 app = Flask(__name__)
+CORS(app)
 
 
 @app.route('/workspace', methods=['POST'])
@@ -74,8 +76,10 @@ def get_all_link():
             return_json['workplace'] = doc.to_dict()['name']
             continue
         
-        d = doc.to_dict()
-        d['docID'] = doc.id
+        d = {'docID': doc.id}
+        for k, v in doc.to_dict().items():
+            d[k] = v
+        
         links.append(d)
     
     return_json['links'] = links
@@ -85,7 +89,7 @@ def get_all_link():
 @app.route('/link', methods=['POST'])
 def create_link():
     data = request.get_json()
-    if not data or "key" not in data:
+    if not data or "key" not in data or "link" not in data or "name" not in data:
         return "Key needed to create workspace", 400
     
     wk = db.collection(data['key'])
@@ -93,21 +97,21 @@ def create_link():
         return "Workspace must be created before adding a link", 400
     
     link_id = wk.document()
-    link_id.set(data['link'])
+    link_id.set({"name": data['name'], "link": data['link']})
     return jsonify({"docID": link_id.id}), 200
 
 
 @app.route('/link', methods=['PUT'])
 def update_link():
     data = request.get_json()
-    if not data or "key" not in data or "docID" not in data:
+    if not data or "key" not in data or "docID" not in data or "link" not in data or "name" not in data:
         return "Key and docID are needed to update link", 400
     
     wk = db.collection(data['key'])
     if not wk.document('init').get().exists:
         return "Workspace must be created before updating a link", 400
     
-    wk.document(data['docID']).set(data['update'])
+    wk.document(data['docID']).set({"name": data['name'], "link": data['link']})
     return '', 200
 
 

@@ -45,7 +45,7 @@ def test_get_link(app, client):
     create_link(client, TEST_LINK_1)
     res = client.get('/link', query_string={"key": wk})
     msg = byte_to_dict(res.data)
-    assert res.status_code == 200 and len(msg['links']) == 1 and assert_key_in_list("LINK_ONE", msg['links'])
+    assert res.status_code == 200 and len(msg['links']) == 1 and assert_key_in_list("yt link", msg['links'])
 
 
 def test_get_two_links(app, client):
@@ -59,7 +59,7 @@ def test_get_two_links(app, client):
     res = client.get('/link', query_string={"key": wk})
     msg = byte_to_dict(res.data)
     assert res.status_code == 200 and len(msg['links']) == 2 and \
-           assert_key_in_list("LINK_ONE", msg['links']) and assert_key_in_list("LINK_TWO", msg['links'])
+           assert_key_in_list("yt link", msg['links']) and assert_key_in_list("gg link", msg['links'])
 
 
 def test_update_link_no_body(app, client):
