@@ -15,6 +15,9 @@ db = create_db()
 app = Flask(__name__)
 CORS(app)
 
+# TODO: PUT/workspace -> allow modify workspace name
+# TODO: GET/workspace -> get workspace name (simplifies api calls)
+
 
 @app.route('/workspace', methods=['POST'])
 def create_workspace():
@@ -73,7 +76,6 @@ def get_all_link():
     return_json = {}
     for doc in docs.stream():
         if doc.id == "init":
-            return_json['workplace'] = doc.to_dict()['name']
             continue
         
         d = {'docID': doc.id}
