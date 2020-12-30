@@ -10,6 +10,7 @@ import {
     Container,
     NavDropdown
 } from "react-bootstrap";
+import AddWorkspace from "./components/AddWorkspace";
 
 interface IProps {
 
@@ -19,6 +20,7 @@ interface IState {
     selectedWorkspace: IWorkspace
     workspace: IWorkspace[]
     addWorkspace: string
+    isCreatingNewWorkspace: boolean
 }
 
 class Popup extends Component<IProps, IState> {
@@ -27,8 +29,10 @@ class Popup extends Component<IProps, IState> {
         this.state = {
             selectedWorkspace: {name: '', key: ''},
             workspace: [],
-            addWorkspace: ''
+            addWorkspace: '',
+            isCreatingNewWorkspace: false
         }
+        this.handleCreateWorkspace = this.handleCreateWorkspace.bind(this)
     }
     
     componentDidMount() {
@@ -42,6 +46,11 @@ class Popup extends Component<IProps, IState> {
     
     addWorkspaceHandler = event => {
         this.setState({addWorkspace: event.target.value})
+    }
+    
+    
+    handleCreateWorkspace(){
+        this.setState({isCreatingNewWorkspace: false})
     }
     
     
@@ -103,7 +112,7 @@ class Popup extends Component<IProps, IState> {
                             }
                             {this.state.workspace.length != 0 && <NavDropdown.Divider/>}
                             
-                            <NavDropdown.Item>Create New</NavDropdown.Item>
+                            <NavDropdown.Item onClick={() => this.setState({isCreatingNewWorkspace: true})}>Create New</NavDropdown.Item>
                         </NavDropdown>
                         
                         <Form inline>
@@ -113,7 +122,8 @@ class Popup extends Component<IProps, IState> {
                         </Form>
                     </Container>
                 </Navbar>
-                <Link workSpaceKey={this.state.selectedWorkspace.key}/>
+                {!this.state.isCreatingNewWorkspace && <Link workSpaceKey={this.state.selectedWorkspace.key}/>}
+                {this.state.isCreatingNewWorkspace && <AddWorkspace handler={this.handleCreateWorkspace.bind(this)}/>}
             </div>
         );
     }
