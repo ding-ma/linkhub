@@ -1,7 +1,7 @@
-interface Link{
+interface ILink {
     docID: string,
     link: string,
     name: string
 }
 
-export default Link;
+export default ILink;

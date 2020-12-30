@@ -62,6 +62,34 @@ def delete_workspace():
     return '', 200
 
 
+@app.route('/workspace', methods=['GET'])
+def get_workspace_name():
+    key = request.args.get('key')
+    if not key:
+        return "Key needed to get workspace name", 400
+    docs = db.collection(key)
+    init = docs.document('init').get()
+    if not init.exists:
+        return "Workspace must be created first", 400
+    
+    return {'name': init.to_dict()['name']}, 200
+
+
+@app.route('/workspace', methods=['PUT'])
+def change_workspace_name():
+    data = request.get_json()
+    print(data)
+    if not data or "pwd" not in data or "key" not in data or "name" not in data:
+        return "Password, key, and name needed to change workspace name", 400
+    
+    key = db.collection(data['key'])
+    if not key.document('init').get().exists:
+        return "This workspace does not exist", 400
+
+    key.document('init').update({'name': data['name']})
+    return '', 200
+
+
 @app.route('/link', methods=['GET'])
 def get_all_link():
     key = request.args.get('key')
@@ -132,4 +160,4 @@ def delete_link():
 
 
 if __name__ == '__main__':
-    app.run(threaded=True, host='0.0.0.0', port=int(os.environ.get("PORT", 8080)))
+    app.run(threaded=True, host='0.0.0.0', port=int(os.environ.get("PORT", 5555)))

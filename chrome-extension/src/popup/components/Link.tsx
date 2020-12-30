@@ -1,12 +1,12 @@
 import React, {Component} from 'react';
-import LinkInterface from "../interfaces/LinkInterface";
+import ILink from "../interfaces/ILink";
 
 interface IProps {
-    workspace: string
+    workSpaceKey: string
 }
 
 interface IState {
-    links: LinkInterface[],
+    links: ILink[],
     loading: boolean
 }
 
@@ -20,14 +20,22 @@ class Link extends Component<IProps, IState> {
         }
     }
     
-    async componentDidMount() {
-        const url = "http://localhost:5555/link?key="+this.props.workspace
-        const resp:LinkInterface = await fetch(url).then(r => r.json())
-        this.setState( {links:resp['links'], loading:false})
+    async componentDidUpdate(prevProps: Readonly<IProps>, prevState: Readonly<IState>, snapshot?: any) {
+        if (prevProps.workSpaceKey !== this.props.workSpaceKey){
+            this.setState({loading: true})
+        }
+        if (this.props.workSpaceKey !== '' && this.state.loading){
+            const url = "http://localhost:5555/link?key="+this.props.workSpaceKey
+            const resp:ILink = await fetch(url).then(r => r.json())
+            console.log(resp)
+            this.setState( {links:resp['links'], loading:false})
+        }
     }
     
     render() {
-        if (this.props.workspace === ''){
+        console.log(this.props.workSpaceKey)
+        
+        if (this.props.workSpaceKey === ''){
             return <div>First select a workspace!</div>
         }
         
@@ -39,12 +47,13 @@ class Link extends Component<IProps, IState> {
             return <div>No links found! Add some!</div>
         }
         
+        //todo implement pagination
         return (
             <div>
                 <div>{this.state.links.map(link =>
                     <div id={link.docID}>
+                        <h3>{link.name}</h3>
                         <p>{link.link}</p>
-                        <p>{link.name}</p>
                     </div>
                 )}</div>
             </div>
