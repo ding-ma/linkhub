@@ -21,6 +21,7 @@ interface IState {
     workspace: IWorkspace[]
     addWorkspace: string
     isCreatingNewWorkspace: boolean
+    error: string
 }
 
 class Popup extends Component<IProps, IState> {
@@ -30,7 +31,8 @@ class Popup extends Component<IProps, IState> {
             selectedWorkspace: {name: '', key: ''},
             workspace: [],
             addWorkspace: '',
-            isCreatingNewWorkspace: false
+            isCreatingNewWorkspace: false,
+            error: ''
         }
         this.handleCreateWorkspace = this.handleCreateWorkspace.bind(this)
     }
@@ -49,38 +51,38 @@ class Popup extends Component<IProps, IState> {
     }
     
     
-    handleCreateWorkspace(){
-        this.setState({isCreatingNewWorkspace: false})
+    handleCreateWorkspace(state: IState){
+        this.setState(state)
     }
     
     
     async submitAddWorkspace(){
         //todo error handling
         const toAdd = this.state.addWorkspace
-        if (toAdd === "" || toAdd.length !== 8){
-            console.log("need to have a workspace")
+        if (toAdd === "" || toAdd.length !== 11){
+            this.setState({error: "cant be empty or length != 11"})
             return
         }
         
         const workspaces = []
         this.state.workspace.forEach(e => workspaces.push(e.key))
         if (workspaces.includes(toAdd)){
-            console.log("this workspace is already added")
+            this.setState({error: "this workspace is already added"})
             return
         }
 
         const url = "http://localhost:5555/workspace?key="+toAdd
         const resp = await fetch(url)
-        console.log(resp)
-        console.log(resp.status)
-        console.log("aaaaaaaaaaaaaaa")
-        if (resp.status != 200){
-            console.log("somthing went wrong")
-            return
-        }
-        const name = await resp.json()
+            .then(async r => {
+                if(!r.ok){
+                    this.setState({error: await r.text()})
+                }
+                return r.json()
+            })
+            .catch(err =>console.log(err))
+
         this.setState({
-            workspace: [...this.state.workspace, {"name": name['name'], "key":toAdd}]
+            workspace: [...this.state.workspace, {"name": resp['name'], "key":toAdd}]
         })
 
         localStorage.setItem("workspace", JSON.stringify(this.state.workspace))
@@ -88,6 +90,7 @@ class Popup extends Component<IProps, IState> {
             input => (input.value = "")
         );
         this.setState({addWorkspace: ''})
+        console.log("state reset")
     }
     
     render() {
@@ -124,6 +127,7 @@ class Popup extends Component<IProps, IState> {
                 </Navbar>
                 {!this.state.isCreatingNewWorkspace && <Link workSpaceKey={this.state.selectedWorkspace.key}/>}
                 {this.state.isCreatingNewWorkspace && <AddWorkspace handler={this.handleCreateWorkspace.bind(this)}/>}
+                {this.state.error !=='' && <span onClick={() => this.setState({error: ''})}>Error msg: {this.state.error}</span>}
             </div>
         );
     }

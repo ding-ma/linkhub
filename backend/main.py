@@ -25,6 +25,9 @@ def create_workspace():
     if not data or "pwd" not in data or "name" not in data:
         return "Password and name needed to create a new workspace", 400
     
+    if not data["pwd"] or not data["name"]:
+        return "Password or name can't be empty", 400
+    
     unique_id = secrets.token_urlsafe(8)
     wk = db.collection(unique_id)
     wk.document("init").set(data)
