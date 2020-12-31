@@ -85,8 +85,9 @@ class Popup extends Component<IProps, IState> {
             .then(async r => {
                 if (!r.ok) {
                     this.setState({error: await r.text()})
+                } else {
+                    return r.json()
                 }
-                return r.json()
             })
             .catch(err => console.log(err))
         

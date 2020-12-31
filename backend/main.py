@@ -101,7 +101,7 @@ def get_all_link():
     
     docs = db.collection(key)
     if not docs.document('init').get().exists:
-        return "Workspace must be created before getting links", 400
+        return "This workspace does not exist", 400
     
     links = []
     return_json = {}
@@ -125,9 +125,16 @@ def create_link():
     if not data or "key" not in data or "link" not in data or "name" not in data:
         return "Key needed to create workspace", 400
     
+    if data["link"] == "":
+        return "link cant be empty", 400
+    
     wk = db.collection(data['key'])
     if not wk.document('init').get().exists:
         return "Workspace must be created before adding a link", 400
+    
+    link = data['link']
+    if "http" not in link:
+        "http://"
     
     link_id = wk.document()
     link_id.set({"name": data['name'], "link": data['link']})
