@@ -29,7 +29,7 @@ def test_get_link_no_body(app, client):
 def test_get_link_no_workspace(app, client):
     res = client.get('/link', query_string={"key": "somekey"})
     msg = byte_to_string(res.data)
-    assert res.status_code == 400 and "Workspace must be created before getting links" in msg
+    assert res.status_code == 400 and "This workspace does not exist" in msg
 
 
 def test_get_link_empty_workspace(app, client):

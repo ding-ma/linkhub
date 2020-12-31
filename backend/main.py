@@ -15,8 +15,7 @@ db = create_db()
 app = Flask(__name__)
 CORS(app)
 
-# TODO: PUT/workspace -> allow modify workspace name
-# TODO: GET/workspace -> get workspace name (simplifies api calls)
+# TODO: PUT/workspace,  GET/workspace -> unit tests
 
 
 @app.route('/workspace', methods=['POST'])
