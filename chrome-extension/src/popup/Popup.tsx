@@ -20,6 +20,7 @@ interface IState {
     selectedWorkspace: IWorkspace
     workspace: IWorkspace[]
     addWorkspace: string
+    addedWorkspace: IWorkspace
     isCreatingNewWorkspace: boolean
     error: string
 }
@@ -32,7 +33,8 @@ class Popup extends Component<IProps, IState> {
             workspace: [],
             addWorkspace: '',
             isCreatingNewWorkspace: false,
-            error: ''
+            error: '',
+            addedWorkspace: {name: '', key: ''}
         }
         this.handleCreateWorkspace = this.handleCreateWorkspace.bind(this)
     }
@@ -51,40 +53,47 @@ class Popup extends Component<IProps, IState> {
     }
     
     
-    handleCreateWorkspace(state: IState){
-        this.setState(state)
+    handleCreateWorkspace(passedState: IState) {
+        if (passedState.addedWorkspace !== undefined){
+            this.setState({
+                workspace: [...this.state.workspace, {"name": passedState.addedWorkspace.name, "key": passedState.addedWorkspace.key}],
+                selectedWorkspace: {"name": passedState.addedWorkspace.name, "key": passedState.addedWorkspace.key}
+            })
+            localStorage.setItem("workspace", JSON.stringify(this.state.workspace))
+        }
+        this.setState(passedState)
     }
     
     
-    async submitAddWorkspace(){
+    async submitAddWorkspace() {
         //todo error handling
         const toAdd = this.state.addWorkspace
-        if (toAdd === "" || toAdd.length !== 11){
+        if (toAdd === "" || toAdd.length !== 11) {
             this.setState({error: "cant be empty or length != 11"})
             return
         }
         
         const workspaces = []
         this.state.workspace.forEach(e => workspaces.push(e.key))
-        if (workspaces.includes(toAdd)){
+        if (workspaces.includes(toAdd)) {
             this.setState({error: "this workspace is already added"})
             return
         }
-
-        const url = "http://localhost:5555/workspace?key="+toAdd
+        
+        const url = "http://localhost:5555/workspace?key=" + toAdd
         const resp = await fetch(url)
             .then(async r => {
-                if(!r.ok){
+                if (!r.ok) {
                     this.setState({error: await r.text()})
                 }
                 return r.json()
             })
-            .catch(err =>console.log(err))
-
+            .catch(err => console.log(err))
+        
         this.setState({
-            workspace: [...this.state.workspace, {"name": resp['name'], "key":toAdd}]
+            workspace: [...this.state.workspace, {"name": resp['name'], "key": toAdd}]
         })
-
+        
         localStorage.setItem("workspace", JSON.stringify(this.state.workspace))
         Array.from(document.querySelectorAll("input")).forEach(
             input => (input.value = "")
@@ -115,7 +124,8 @@ class Popup extends Component<IProps, IState> {
                             }
                             {this.state.workspace.length != 0 && <NavDropdown.Divider/>}
                             
-                            <NavDropdown.Item onClick={() => this.setState({isCreatingNewWorkspace: true})}>Create New</NavDropdown.Item>
+                            <NavDropdown.Item onClick={() => this.setState({isCreatingNewWorkspace: true})}>Create
+                                New</NavDropdown.Item>
                         </NavDropdown>
                         
                         <Form inline>
@@ -127,12 +137,13 @@ class Popup extends Component<IProps, IState> {
                 </Navbar>
                 {!this.state.isCreatingNewWorkspace && <Link workSpaceKey={this.state.selectedWorkspace.key}/>}
                 {this.state.isCreatingNewWorkspace && <AddWorkspace handler={this.handleCreateWorkspace.bind(this)}/>}
-                {this.state.error !=='' && <span onClick={() => this.setState({error: ''})}>Error msg: {this.state.error}</span>}
+                {this.state.error !== '' &&
+                <span onClick={() => this.setState({error: ''})}>Error msg: {this.state.error}</span>}
             </div>
         );
     }
     
-   
+    
 }
 
 export default Popup;

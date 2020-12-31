@@ -38,7 +38,7 @@ class AddWorkspace extends Component<IProps, IState> {
         
         const {name, password} = this.state
         const url = "http://localhost:5555/workspace"
-        const res = fetch(url, {
+       fetch(url, {
             method: "post",
             headers: {
                 'Content-Type': 'application/json',
@@ -49,19 +49,19 @@ class AddWorkspace extends Component<IProps, IState> {
             })
         })
             .then( async r => {
-                if (!r.status){
-                    this.props.handler({error: await JSON.stringify(r.statusText)})
+                if (!r.ok){
+                    this.props.handler({error: await r.text()})
                 }
-                this.props.handler({error: JSON.stringify(await r.json())})
+                const key = await r.json()
+                this.props.handler({addedWorkspace: {name: name, key: key['key']}, isCreatingNewWorkspace: false})
             })
-            .catch(e => console.log(e))
+            
         
         
         Array.from(document.querySelectorAll("input")).forEach(
             input => (input.value = "")
         );
         this.setState({password:'', name:''})
-        // this.props.handler({})
     }
     
     cancelNewWorkspace(){
