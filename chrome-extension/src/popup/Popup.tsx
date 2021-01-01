@@ -43,11 +43,20 @@ class Popup extends Component<IProps, IState> {
     }
     
     componentDidMount() {
+        const lastWorkspace = JSON.parse(localStorage.getItem("currentWorkspace"))
+        if (lastWorkspace != null){
+            this.setState({selectedWorkspace: lastWorkspace})
+        }
+        
         const workspaces = JSON.parse(localStorage.getItem("workspace"))
-        if (workspaces == null) {
-            this.setState({workspace: []})
-        } else {
+        if (workspaces != null) {
             this.setState({workspace: workspaces})
+        }
+    }
+    
+    componentDidUpdate(prevProps: Readonly<IProps>, prevState: Readonly<IState>, snapshot?: any) {
+        if (prevState.selectedWorkspace !== this.state.selectedWorkspace){
+            localStorage.setItem("currentWorkspace", JSON.stringify(this.state.selectedWorkspace))
         }
     }
     
