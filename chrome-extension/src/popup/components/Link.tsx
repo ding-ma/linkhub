@@ -4,6 +4,7 @@ import {Button, Form} from "react-bootstrap";
 import PaginationList from 'react-pagination-list';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faPen, faTrash} from "@fortawesome/free-solid-svg-icons";
+import {ENDPOINT} from "../environment";
 
 interface IProps {
     workSpaceKey: string
@@ -49,14 +50,13 @@ class Link extends Component<IProps, IState> {
             this.setState({loading: true})
         }
         if (wkKey !== '' && this.state.loading ) {
-            const url = "http://localhost:5555/link?key=" + wkKey
-            fetch(url)
+            
+            fetch(ENDPOINT+"/link?key=" + wkKey)
                 .then(async r => {
                     if (!r.ok) {
                         this.setState({error: await r.text(), loading: false})
                     } else {
                         const links = await r.json()
-                        console.log("fetched links",links)
                         this.setState({links: links['links'], loading: false})
                     }
                 })
@@ -72,11 +72,9 @@ class Link extends Component<IProps, IState> {
     
     async submitNewLink(event) {
         event.preventDefault()
-        console.log(this.state.addingLink)
         
         const {name, link} = this.state.addingLink
-        const endpoint = "http://localhost:5555/link"
-        fetch(endpoint, {
+        fetch(ENDPOINT+"/link", {
             method: "post",
             headers: {
                 'Content-Type': 'application/json',
@@ -107,17 +105,19 @@ class Link extends Component<IProps, IState> {
     
     
     displayNameOrLink(name: string, link: string): string {
-        return name === "" ? link : name
+        if (name === ""){
+            return link.length > 40? link.slice(0,35)+"...": link
+        }
+        return name
     }
     
     
     handleEditLink(event, toChange:ILink) {
-    
+    //todo implemented later
     }
     
     async handleDeleteLink(event, toDelete: ILink) {
-        const endpoint = "http://localhost:5555/link"
-        fetch(endpoint, {
+        fetch(ENDPOINT+"/link", {
             method:"delete",
             headers: {
                 'Content-Type': 'application/json',
@@ -141,8 +141,6 @@ class Link extends Component<IProps, IState> {
     
     
     render() {
-        console.log(this.state.links)
-    
         if (this.state.isAddingLink) {
             return (
                 <Form className="text-center" autoComplete={'off'}>
@@ -204,7 +202,7 @@ class Link extends Component<IProps, IState> {
                             </a>
                             
                             {/*todo make it on hover only*/}
-                            <FontAwesomeIcon icon={faPen} onClick={(event) => this.handleEditLink(event, link)}/>
+                            {/*<FontAwesomeIcon icon={faPen} onClick={(event) => this.handleEditLink(event, link)}/>*/}
                             <FontAwesomeIcon icon={faTrash} onClick={(event) => this.handleDeleteLink(event, link)}/>
                         </div>
                     

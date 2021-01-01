@@ -2,6 +2,7 @@ import React, {Component} from "react";
 import IWorkspace from "../interfaces/IWorkspace";
 import {Button, Form} from "react-bootstrap";
 import "./AddWorkspace.scss"
+import {ENDPOINT} from "../environment";
 
 
 interface IProps {
@@ -37,8 +38,7 @@ class AddWorkspace extends Component<IProps, IState> {
         event.preventDefault()
         
         const {name, password} = this.state
-        const url = "http://localhost:5555/workspace"
-        fetch(url, {
+        fetch(ENDPOINT+"/workspace", {
             method: "post",
             headers: {
                 'Content-Type': 'application/json',

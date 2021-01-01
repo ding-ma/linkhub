@@ -13,6 +13,7 @@ import {
 import AddWorkspace from "./components/AddWorkspace";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faTrash, faClipboard, faMinusCircle} from "@fortawesome/free-solid-svg-icons";
+import {ENDPOINT} from "./environment";
 
 interface IProps {
 
@@ -71,7 +72,6 @@ class Popup extends Component<IProps, IState> {
     
     
     async submitAddWorkspace() {
-        //todo error handling
         const toAdd = this.state.addWorkspace
         if (toAdd === "" || toAdd.length !== 11) {
             this.setState({error: "cant be empty or length != 11"})
@@ -85,8 +85,7 @@ class Popup extends Component<IProps, IState> {
             return
         }
         
-        const url = "http://localhost:5555/workspace?key=" + toAdd
-        const resp = await fetch(url)
+        const resp = await fetch(ENDPOINT+"/workspace?key=" + toAdd)
             .then(async r => {
                 if (!r.ok) {
                     this.setState({error: await r.text()})
@@ -94,7 +93,6 @@ class Popup extends Component<IProps, IState> {
                     return r.json()
                 }
             })
-            .catch(err => console.log(err))
         
         this.setState({
             workspace: [...this.state.workspace, {"name": resp['name'], "key": toAdd}]
@@ -105,17 +103,15 @@ class Popup extends Component<IProps, IState> {
             input => (input.value = "")
         );
         this.setState({addWorkspace: ''})
-        console.log("state reset")
     }
     
     async deleteWorkspacePermanent(event) {
-        const name = prompt("Type ("+this.state.selectedWorkspace.name+") to delete permanently")
+        const name = prompt("Type ("+this.state.selectedWorkspace.name+") to delete PERMANENTLY")
         if (name !== this.state.selectedWorkspace.name){
             return
         }
         const pwd = prompt("Enter workspace password")
-        const url = "http://localhost:5555/workspace"
-        fetch(url, {
+        fetch(ENDPOINT+"/workspace", {
             method:"delete",
             headers: {
                 'Content-Type': 'application/json',
@@ -139,7 +135,7 @@ class Popup extends Component<IProps, IState> {
     }
     
     deleteWorkspaceLocal= () =>{
-        const pwd = prompt("Type ("+this.state.selectedWorkspace.name+") to delete locally")
+        const pwd = prompt("Type ("+this.state.selectedWorkspace.name+") to remove LOCALLY")
         if (pwd !== this.state.selectedWorkspace.name){
             return
         }
@@ -162,12 +158,11 @@ class Popup extends Component<IProps, IState> {
     
     render() {
         const deleteChangeViewWorkspace = (this.state.selectedWorkspace.name === "" ? <div/> :
-                <div>
-                    <FontAwesomeIcon icon={faClipboard} onClick={this.copyToClipboard}/>
+                <div className="modify">
+                    <FontAwesomeIcon icon={faClipboard} onClick={this.copyToClipboard} className="fa-icon"/>
                     <FontAwesomeIcon icon={faMinusCircle} onClick={this.deleteWorkspaceLocal} />
                     <FontAwesomeIcon icon={faTrash} onClick={(e) => this.deleteWorkspacePermanent(e)}/>
                 </div>
-        
         )
         
         return (
@@ -211,8 +206,6 @@ class Popup extends Component<IProps, IState> {
             </div>
         );
     }
-    
-    
 }
 
 export default Popup;
