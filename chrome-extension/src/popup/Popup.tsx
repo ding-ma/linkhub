@@ -11,6 +11,8 @@ import {
     NavDropdown
 } from "react-bootstrap";
 import AddWorkspace from "./components/AddWorkspace";
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {faTrash, faClipboard, faMinusCircle} from "@fortawesome/free-solid-svg-icons";
 
 interface IProps {
 
@@ -54,9 +56,12 @@ class Popup extends Component<IProps, IState> {
     
     
     handleCreateWorkspace(passedState: IState) {
-        if (passedState.addedWorkspace !== undefined){
+        if (passedState.addedWorkspace !== undefined) {
             this.setState({
-                workspace: [...this.state.workspace, {"name": passedState.addedWorkspace.name, "key": passedState.addedWorkspace.key}],
+                workspace: [...this.state.workspace, {
+                    "name": passedState.addedWorkspace.name,
+                    "key": passedState.addedWorkspace.key
+                }],
                 selectedWorkspace: {"name": passedState.addedWorkspace.name, "key": passedState.addedWorkspace.key}
             })
             localStorage.setItem("workspace", JSON.stringify(this.state.workspace))
@@ -103,7 +108,68 @@ class Popup extends Component<IProps, IState> {
         console.log("state reset")
     }
     
+    async deleteWorkspacePermanent(event) {
+        const name = prompt("Type ("+this.state.selectedWorkspace.name+") to delete permanently")
+        if (name !== this.state.selectedWorkspace.name){
+            return
+        }
+        const pwd = prompt("Enter workspace password")
+        const url = "http://localhost:5555/workspace"
+        fetch(url, {
+            method:"delete",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                key: this.state.selectedWorkspace.key,
+                pwd: pwd
+            })
+        })
+            .then(async r => {
+                if (!r.ok){
+                    this.setState({error: await r.text()})
+                } else {
+                    const newWorkspaces = this.state.workspace.filter(e =>
+                        e.key !== this.state.selectedWorkspace.key && e.name !== this.state.selectedWorkspace.name
+                    )
+                    localStorage.setItem("workspace", JSON.stringify(newWorkspaces))
+                    this.setState({selectedWorkspace: {name: '', key: ''}, error: '',workspace: newWorkspaces})
+                }
+            })
+    }
+    
+    deleteWorkspaceLocal= () =>{
+        const pwd = prompt("Type ("+this.state.selectedWorkspace.name+") to delete locally")
+        if (pwd !== this.state.selectedWorkspace.name){
+            return
+        }
+        const newWorkspaces = this.state.workspace.filter(e =>
+            e.key !== this.state.selectedWorkspace.key && e.name !== this.state.selectedWorkspace.name
+        )
+        localStorage.setItem("workspace", JSON.stringify(newWorkspaces))
+        this.setState({selectedWorkspace: {name: '', key: ''}, error: '',workspace: newWorkspaces})
+    }
+    
+    copyToClipboard = () => {
+        const textField = document.createElement('textarea');
+        textField.innerText = this.state.selectedWorkspace.key;
+        document.body.appendChild(textField)
+        textField.select()
+        document.execCommand('copy')
+        textField.remove()
+    }
+    
+    
     render() {
+        const deleteChangeViewWorkspace = (this.state.selectedWorkspace.name === "" ? <div/> :
+                <div>
+                    <FontAwesomeIcon icon={faClipboard} onClick={this.copyToClipboard}/>
+                    <FontAwesomeIcon icon={faMinusCircle} onClick={this.deleteWorkspaceLocal} />
+                    <FontAwesomeIcon icon={faTrash} onClick={(e) => this.deleteWorkspacePermanent(e)}/>
+                </div>
+        
+        )
+        
         return (
             <div className="popupContainer">
                 <Navbar expand="lg" variant="light" bg="light">
@@ -129,8 +195,10 @@ class Popup extends Component<IProps, IState> {
                                 New</NavDropdown.Item>
                         </NavDropdown>
                         
+                        {deleteChangeViewWorkspace}
+                        
                         <Form inline>
-                            <FormControl type="text" placeholder="Add Workspace" className="mr-sm-n1"
+                            <FormControl type="text" placeholder="Workspace Key..." className="mr-sm-n1"
                                          onChange={this.addWorkspaceHandler}/>
                             <Button variant="outline-primary" onClick={() => this.submitAddWorkspace()}>Add</Button>
                         </Form>
