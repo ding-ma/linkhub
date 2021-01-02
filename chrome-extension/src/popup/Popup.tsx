@@ -3,17 +3,13 @@ import "./Popup.scss";
 import Link from "./components/Link";
 import Button from 'react-bootstrap/Button';
 import IWorkspace from "./interfaces/IWorkspace";
-import {
-    Form,
-    Navbar,
-    FormControl,
-    Container,
-    NavDropdown
-} from "react-bootstrap";
+import {Container, Form, FormControl, Navbar, NavDropdown} from "react-bootstrap";
 import AddWorkspace from "./components/AddWorkspace";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faTrash, faClipboard, faMinusCircle} from "@fortawesome/free-solid-svg-icons";
+import {faClipboard, faMinusCircle, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {ENDPOINT} from "./environment";
+import EPopupModes from "./interfaces/EPopupModes";
+import IDeleteWorkspace from "./interfaces/IDeleteWorkspace";
 
 interface IProps {
 
@@ -24,8 +20,9 @@ interface IState {
     workspace: IWorkspace[]
     addWorkspace: string
     addedWorkspace: IWorkspace
-    isCreatingNewWorkspace: boolean
+    popupMode: EPopupModes
     error: string
+    deleteWorkspace: IDeleteWorkspace
 }
 
 class Popup extends Component<IProps, IState> {
@@ -35,16 +32,17 @@ class Popup extends Component<IProps, IState> {
             selectedWorkspace: {name: '', key: ''},
             workspace: [],
             addWorkspace: '',
-            isCreatingNewWorkspace: false,
+            popupMode: EPopupModes.VIEW,
             error: '',
-            addedWorkspace: {name: '', key: ''}
+            addedWorkspace: {name: '', key: ''},
+            deleteWorkspace: {name: '', pwd: ''}
         }
         this.handleCreateWorkspace = this.handleCreateWorkspace.bind(this)
     }
     
     componentDidMount() {
         const lastWorkspace = JSON.parse(localStorage.getItem("currentWorkspace"))
-        if (lastWorkspace != null){
+        if (lastWorkspace != null) {
             this.setState({selectedWorkspace: lastWorkspace})
         }
         
@@ -55,13 +53,21 @@ class Popup extends Component<IProps, IState> {
     }
     
     componentDidUpdate(prevProps: Readonly<IProps>, prevState: Readonly<IState>, snapshot?: any) {
-        if (prevState.selectedWorkspace !== this.state.selectedWorkspace){
+        if (prevState.selectedWorkspace !== this.state.selectedWorkspace) {
             localStorage.setItem("currentWorkspace", JSON.stringify(this.state.selectedWorkspace))
         }
     }
     
     addWorkspaceHandler = event => {
         this.setState({addWorkspace: event.target.value})
+    }
+    
+    deleteWorkspaceNameHandler = event => {
+        this.setState({deleteWorkspace: {name: event.target.value, pwd: this.state.deleteWorkspace.pwd}})
+    }
+    
+    deleteWorkspacePwdHandler = event => {
+        this.setState({deleteWorkspace: {name: this.state.deleteWorkspace.name, pwd: event.target.value}})
     }
     
     
@@ -94,34 +100,38 @@ class Popup extends Component<IProps, IState> {
             return
         }
         
-        const resp = await fetch(ENDPOINT+"/workspace?key=" + toAdd)
+        const resp = await fetch(ENDPOINT + "/workspace?key=" + toAdd)
             .then(async r => {
-                if (!r.ok) {
-                    this.setState({error: await r.text()})
-                } else {
+                if (r.ok) {
                     return r.json()
+                } else {
+                    this.setState({error: await r.text()})
                 }
             })
         
         this.setState({
-            workspace: [...this.state.workspace, {"name": resp['name'], "key": toAdd}]
+            workspace: [...this.state.workspace, {"name": resp['name'], "key": toAdd}],
+            addWorkspace: '',
+            selectedWorkspace: {"name": resp['name'], "key": toAdd},
+            popupMode: EPopupModes.VIEW
         })
         
         localStorage.setItem("workspace", JSON.stringify(this.state.workspace))
         Array.from(document.querySelectorAll("input")).forEach(
             input => (input.value = "")
         );
-        this.setState({addWorkspace: ''})
     }
     
-    async deleteWorkspacePermanent(event) {
-        const name = prompt("Type ("+this.state.selectedWorkspace.name+") to delete PERMANENTLY")
-        if (name !== this.state.selectedWorkspace.name){
+    deleteWorkspacePermanent(event) {
+        event.preventDefault()
+        
+        const {name, pwd} = this.state.deleteWorkspace
+        if (name !== this.state.selectedWorkspace.name) {
+            this.setState({error: "Name typed wrong!"})
             return
         }
-        const pwd = prompt("Enter workspace password")
-        fetch(ENDPOINT+"/workspace", {
-            method:"delete",
+        fetch(ENDPOINT + "/workspace", {
+            method: "delete",
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -131,28 +141,43 @@ class Popup extends Component<IProps, IState> {
             })
         })
             .then(async r => {
-                if (!r.ok){
-                    this.setState({error: await r.text()})
-                } else {
+                if (r.ok) {
                     const newWorkspaces = this.state.workspace.filter(e =>
                         e.key !== this.state.selectedWorkspace.key && e.name !== this.state.selectedWorkspace.name
                     )
                     localStorage.setItem("workspace", JSON.stringify(newWorkspaces))
-                    this.setState({selectedWorkspace: {name: '', key: ''}, error: '',workspace: newWorkspaces})
+                    this.setState({
+                        selectedWorkspace: {name: '', key: ''},
+                        error: '',
+                        workspace: newWorkspaces,
+                        popupMode: EPopupModes.VIEW
+                    })
+                } else {
+                    this.setState({error: await r.text()})
                 }
             })
+        Array.from(document.querySelectorAll("input")).forEach(
+            input => (input.value = "")
+        );
     }
     
-    deleteWorkspaceLocal= () =>{
-        const pwd = prompt("Type ("+this.state.selectedWorkspace.name+") to remove LOCALLY")
-        if (pwd !== this.state.selectedWorkspace.name){
+    deleteWorkspaceLocal = (event) => {
+        event.preventDefault()
+        if (this.state.deleteWorkspace.name !== this.state.selectedWorkspace.name) {
+            this.setState({error: "Name typed wrong!"})
             return
         }
-        const newWorkspaces = this.state.workspace.filter(e =>
-            e.key !== this.state.selectedWorkspace.key && e.name !== this.state.selectedWorkspace.name
-        )
+        const newWorkspaces = this.state.workspace.filter(e => e.key !== this.state.selectedWorkspace.key)
         localStorage.setItem("workspace", JSON.stringify(newWorkspaces))
-        this.setState({selectedWorkspace: {name: '', key: ''}, error: '',workspace: newWorkspaces})
+        this.setState({
+            selectedWorkspace: {name: '', key: ''},
+            error: '',
+            workspace: newWorkspaces,
+            popupMode: EPopupModes.VIEW
+        })
+        Array.from(document.querySelectorAll("input")).forEach(
+            input => (input.value = "")
+        );
     }
     
     copyToClipboard = () => {
@@ -166,12 +191,72 @@ class Popup extends Component<IProps, IState> {
     
     
     render() {
-        const deleteChangeViewWorkspace = (this.state.selectedWorkspace.name === "" ? <div/> :
+        
+        const deleteLocalView = (<div>
+                <h3>Deleting the workspace LOCALLY</h3>
+                <Form className="text-center" autoComplete={'off'}>
+                    <Form.Group controlId="formBasicEmail">
+                        <Form.Control type="text" placeholder={"Retype (" + this.state.selectedWorkspace.name + ")"}
+                                      onChange={(e) => this.deleteWorkspaceNameHandler(e)}
+                        />
+                    </Form.Group>
+                    
+                    <Button variant="primary" type="submit" onClick={(e) => this.deleteWorkspaceLocal(e)}>
+                        Delete
+                    </Button>
+                    
+                    <Button variant="primary" type="reset" onClick={() => this.setState({popupMode: EPopupModes.VIEW})}>
+                        Cancel
+                    </Button>
+                </Form>
+            </div>
+        )
+        
+        const deletePermanentView = (<div>
+                <h3>Deleting the workspace PERMANENTLY</h3>
+                <Form className="text-center" autoComplete={'off'}>
+                    <Form.Group controlId="formBasicEmail">
+                        <Form.Control type="text" placeholder={"Retype (" + this.state.selectedWorkspace.name + ")"}
+                                      onChange={(e) => this.deleteWorkspaceNameHandler(e)}
+                        />
+                    </Form.Group>
+                    
+                    <Form.Group controlId="formBasicPassword">
+                        <Form.Control type="text" placeholder="Enter workspace Password"
+                                      onChange={(e) => this.deleteWorkspacePwdHandler(e)}/>
+                    </Form.Group>
+                    
+                    <Button variant="primary" type="submit" onClick={(e) => this.deleteWorkspacePermanent(e)}>
+                        Delete
+                    </Button>
+                    
+                    <Button variant="primary" type="reset" onClick={() => this.setState({popupMode: EPopupModes.VIEW})}>
+                        Cancel
+                    </Button>
+                </Form>
+            </div>
+        )
+        
+        
+        const deleteViewIcons = (this.state.selectedWorkspace.name === "" ? <div/> :
                 <div className="modify">
                     <FontAwesomeIcon icon={faClipboard} onClick={this.copyToClipboard} className="fa-icon"/>
-                    <FontAwesomeIcon icon={faMinusCircle} onClick={this.deleteWorkspaceLocal} />
-                    <FontAwesomeIcon icon={faTrash} onClick={(e) => this.deleteWorkspacePermanent(e)}/>
+                    <FontAwesomeIcon icon={faMinusCircle}
+                                     onClick={() => this.setState({popupMode: EPopupModes.DELETE_LOCAL})}/>
+                    <FontAwesomeIcon icon={faTrash}
+                                     onClick={() => this.setState({popupMode: EPopupModes.DELETE_PERM})}/>
                 </div>
+        )
+        
+        const importWorkspaceView = (
+            <Form inline>
+                <FormControl type="text" placeholder="Workspace Key..." className="mr-sm-n1"
+                             onChange={this.addWorkspaceHandler}/>
+                <Button variant="outline-primary" onClick={() => this.submitAddWorkspace()}>Add</Button>
+                <Button variant="primary" type="reset" onClick={() => this.setState({popupMode: EPopupModes.VIEW})}>
+                    Cancel
+                </Button>
+            </Form>
         )
         
         return (
@@ -187,29 +272,32 @@ class Popup extends Component<IProps, IState> {
                             {
                                 this.state.workspace.map(wk =>
                                     <NavDropdown.Item key={wk.key} onClick={() => this.setState({
-                                        selectedWorkspace: {
-                                            name: wk.name,
-                                            key: wk.key
-                                        }
+                                        selectedWorkspace: wk,
+                                        popupMode: EPopupModes.VIEW,
+                                        error: '',
+                                        deleteWorkspace: {name: '', pwd: ''}
                                     })}>{wk.name}</NavDropdown.Item>)
                             }
                             {this.state.workspace.length != 0 && <NavDropdown.Divider/>}
                             
-                            <NavDropdown.Item onClick={() => this.setState({isCreatingNewWorkspace: true})}>Create
-                                New</NavDropdown.Item>
+                            <NavDropdown.Item
+                                onClick={() => this.setState({popupMode: EPopupModes.CREATE})}>Create</NavDropdown.Item>
+                            <NavDropdown.Item
+                                onClick={() => this.setState({popupMode: EPopupModes.IMPORT})}>Import</NavDropdown.Item>
                         </NavDropdown>
                         
-                        {deleteChangeViewWorkspace}
-                        
-                        <Form inline>
-                            <FormControl type="text" placeholder="Workspace Key..." className="mr-sm-n1"
-                                         onChange={this.addWorkspaceHandler}/>
-                            <Button variant="outline-primary" onClick={() => this.submitAddWorkspace()}>Add</Button>
-                        </Form>
+                        {deleteViewIcons}
+                    
                     </Container>
                 </Navbar>
-                {!this.state.isCreatingNewWorkspace && <Link workSpaceKey={this.state.selectedWorkspace.key}/>}
-                {this.state.isCreatingNewWorkspace && <AddWorkspace handler={this.handleCreateWorkspace.bind(this)}/>}
+                
+                {this.state.popupMode === EPopupModes.VIEW && <Link workSpaceKey={this.state.selectedWorkspace.key}/>}
+                {this.state.popupMode === EPopupModes.CREATE &&
+                <AddWorkspace handler={this.handleCreateWorkspace.bind(this)}/>}
+                {this.state.popupMode === EPopupModes.IMPORT && importWorkspaceView}
+                {this.state.popupMode === EPopupModes.DELETE_LOCAL && deleteLocalView}
+                {this.state.popupMode === EPopupModes.DELETE_PERM && deletePermanentView}
+                
                 {this.state.error !== '' &&
                 <span onClick={() => this.setState({error: ''})}>Error msg: {this.state.error}</span>}
             </div>

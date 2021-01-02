@@ -1,13 +1,13 @@
 import React, {Component} from "react";
-import IWorkspace from "../interfaces/IWorkspace";
 import {Button, Form} from "react-bootstrap";
 import "./AddWorkspace.scss"
 import {ENDPOINT} from "../environment";
+import EPopupModes from "../interfaces/EPopupModes";
+import TPopupStates from "../interfaces/TPopupStates";
 
 
 interface IProps {
-    //todo determine type
-    handler: any
+    handler: (state: TPopupStates) => void
 }
 
 interface IState {
@@ -49,11 +49,11 @@ class AddWorkspace extends Component<IProps, IState> {
             })
         })
             .then(async r => {
-                if (!r.ok) {
-                    this.props.handler({error: await r.text()})
-                } else {
+                if (r.ok) {
                     const key = await r.json()
-                    this.props.handler({addedWorkspace: {name: name, key: key['key']}, isCreatingNewWorkspace: false})
+                    this.props.handler({addedWorkspace: {name: name, key: key['key']}, popupMode: EPopupModes.VIEW})
+                } else {
+                    this.props.handler({error: await r.text()})
                 }
             })
         
@@ -84,7 +84,7 @@ class AddWorkspace extends Component<IProps, IState> {
                         Create
                     </Button>
                     
-                    <Button variant="primary" type="reset" onClick={() => this.props.handler({isCreatingNewWorkspace: false})}>
+                    <Button variant="primary" type="reset" onClick={() => this.props.handler({popupMode: EPopupModes.VIEW})}>
                         Cancel
                     </Button>
                 </Form>

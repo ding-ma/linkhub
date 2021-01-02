@@ -133,10 +133,10 @@ def create_link():
     
     link = data['link']
     if "http" not in link:
-        "http://"
-    
+        link = "http://" + link
+        
     link_id = wk.document()
-    link_id.set({"name": data['name'], "link": data['link']})
+    link_id.set({"name": data['name'], "link": link})
     return jsonify({"docID": link_id.id}), 200
 
 
@@ -169,4 +169,4 @@ def delete_link():
 
 
 if __name__ == '__main__':
-    app.run(threaded=True, host='0.0.0.0', port=int(os.environ.get("PORT", 5555)))
+    app.run(threaded=True, host='0.0.0.0', port=int(os.environ.get("PORT", 8080)))

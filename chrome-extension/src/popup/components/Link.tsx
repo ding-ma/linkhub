@@ -43,23 +43,31 @@ class Link extends Component<IProps, IState> {
         this.setState({addingLink: currState})
     }
     
+    fetchLinks() {
+        fetch(ENDPOINT + "/link?key=" + this.props.workSpaceKey)
+            .then(async r => {
+                if (r.ok) {
+                    const links = await r.json()
+                    this.setState({links: links['links'], loading: false})
+                } else {
+                    this.setState({error: await r.text(), loading: false})
+                }
+            })
+    }
+    
+    componentDidMount() {
+        if (this.props.workSpaceKey !== '') {
+            this.fetchLinks()
+        }
+    }
     
     componentDidUpdate(prevProps: Readonly<IProps>, prevState: Readonly<IState>, snapshot?: any) {
         const wkKey = this.props.workSpaceKey
         if (prevProps.workSpaceKey !== wkKey) {
             this.setState({loading: true})
         }
-        if (wkKey !== '' && this.state.loading ) {
-            
-            fetch(ENDPOINT+"/link?key=" + wkKey)
-                .then(async r => {
-                    if (!r.ok) {
-                        this.setState({error: await r.text(), loading: false})
-                    } else {
-                        const links = await r.json()
-                        this.setState({links: links['links'], loading: false})
-                    }
-                })
+        if (wkKey !== '' && this.state.loading) {
+            this.fetchLinks()
         }
     }
     
@@ -74,7 +82,7 @@ class Link extends Component<IProps, IState> {
         event.preventDefault()
         
         const {name, link} = this.state.addingLink
-        fetch(ENDPOINT+"/link", {
+        fetch(ENDPOINT + "/link", {
             method: "post",
             headers: {
                 'Content-Type': 'application/json',
@@ -86,39 +94,40 @@ class Link extends Component<IProps, IState> {
             })
         })
             .then(async r => {
-                if (!r.ok) {
-                    this.setState({error: await r.text()})
-                } else {
+                if (r.ok) {
                     const doc: ILink = await r.json()
                     doc['name'] = name
                     doc['link'] = this.addHTTP(link)
-                    this.setState({links: [...this.state.links, doc]})
+                    this.setState({
+                        links: [...this.state.links, doc],
+                        isAddingLink: false,
+                        addingLink: {docID: '', link: '', name: ''}
+                    })
+                    Array.from(document.querySelectorAll("input")).forEach(
+                        input => (input.value = "")
+                    );
+                } else {
+                    this.setState({error: await r.text()})
                 }
             })
-    
-        Array.from(document.querySelectorAll("input")).forEach(
-            input => (input.value = "")
-        );
-        
-        this.setState({isAddingLink: false, addingLink: {docID: '', link: '', name: ''}})
     }
     
     
     displayNameOrLink(name: string, link: string): string {
-        if (name === ""){
-            return link.length > 40? link.slice(0,35)+"...": link
+        if (name === "") {
+            return link.length > 40 ? link.slice(0, 35) + "..." : link
         }
         return name
     }
     
     
-    handleEditLink(event, toChange:ILink) {
-    //todo implemented later
+    handleEditLink(event, toChange: ILink) {
+        //todo implemented later
     }
     
-    async handleDeleteLink(event, toDelete: ILink) {
-        fetch(ENDPOINT+"/link", {
-            method:"delete",
+    handleDeleteLink(event, toDelete: ILink) {
+        fetch(ENDPOINT + "/link", {
+            method: "delete",
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -127,39 +136,43 @@ class Link extends Component<IProps, IState> {
                 docID: toDelete.docID
             })
         })
-            .then(async r =>{
-                if (!r.ok){
-                
-                } else {
+            .then(async r => {
+                if (r.ok) {
+                    console.log("deleting")
                     const currLinks = this.state.links
                     const updatedLinks = currLinks.filter(e => e !== toDelete)
                     this.setState({links: updatedLinks})
+                } else {
+                    this.setState({error: await r.text()})
                 }
             })
     }
     
     
-    
     render() {
         if (this.state.isAddingLink) {
             return (
-                <Form className="text-center" autoComplete={'off'}>
-                    <Form.Group controlId="formBasicEmail">
-                        <Form.Control type="text" placeholder="Link Name" onChange={this.nameHandler}/>
-                    </Form.Group>
-                    
-                    <Form.Group controlId="formBasicPassword">
-                        <Form.Control type="text" placeholder="URL" onChange={this.urlHandler}/>
-                    </Form.Group>
-                    
-                    <Button variant="primary" type="submit" onClick={e => this.submitNewLink(e)}>
-                        Create
-                    </Button>
-                    
-                    <Button variant="primary" type="reset" onClick={() => this.setState({isAddingLink: false})}>
-                        Cancel
-                    </Button>
-                </Form>
+                <div>
+                    <Form className="text-center" autoComplete={'off'}>
+                        <Form.Group controlId="formBasicEmail">
+                            <Form.Control type="text" placeholder="Link Name" onChange={this.nameHandler}/>
+                        </Form.Group>
+                        
+                        <Form.Group controlId="formBasicPassword">
+                            <Form.Control type="text" placeholder="URL" onChange={this.urlHandler}/>
+                        </Form.Group>
+                        
+                        <Button variant="primary" type="submit" onClick={e => this.submitNewLink(e)}>
+                            Create
+                        </Button>
+                        
+                        <Button variant="primary" type="reset" onClick={() => this.setState({isAddingLink: false})}>
+                            Cancel
+                        </Button>
+                    </Form>
+                    {this.state.error !== '' &&
+                    <span onClick={() => this.setState({error: ''})}>Error msg: {this.state.error}</span>}
+                </div>
             )
         }
         
@@ -169,9 +182,6 @@ class Link extends Component<IProps, IState> {
             </div>
         )
         
-        if (this.state.error !== '') {
-            return <span onClick={() => this.setState({error: ''})}>Error msg: {this.state.error}</span>
-        }
         
         if (this.props.workSpaceKey === '') {
             return <div>First select a workspace!</div>
@@ -188,13 +198,12 @@ class Link extends Component<IProps, IState> {
             </div>)
         }
         
-        //todo implement pagination
         //todo stick pagination on the bottom
         return (
             <div>
                 <PaginationList
                     data={this.state.links}
-                    pageSize={5}
+                    pageSize={7}
                     renderItem={(link: ILink) => (
                         <div key={link.docID}>
                             <a href={link.link} target="_blank"
@@ -205,7 +214,6 @@ class Link extends Component<IProps, IState> {
                             {/*<FontAwesomeIcon icon={faPen} onClick={(event) => this.handleEditLink(event, link)}/>*/}
                             <FontAwesomeIcon icon={faTrash} onClick={(event) => this.handleDeleteLink(event, link)}/>
                         </div>
-                    
                     )}
                 />
                 {addLink}
