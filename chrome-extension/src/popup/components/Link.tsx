@@ -49,6 +49,13 @@ class Link extends Component<IProps, IState> {
                 if (r.ok) {
                     const links = await r.json()
                     this.setState({links: links['links'], loading: false})
+                    /*
+                    todo: implement sorting?
+                    const respJs = await r.json()
+                    const links: ILink[] = respJs['links']
+                    links.sort((a,b) => a.link.localeCompare(b.link))
+                    this.setState({links: links, loading: false})
+                     */
                 } else {
                     this.setState({error: await r.text(), loading: false})
                 }
@@ -82,6 +89,10 @@ class Link extends Component<IProps, IState> {
         event.preventDefault()
         
         const {name, link} = this.state.addingLink
+        if (/\s/g.test(link)){
+            this.setState({error : "links can't contain white space"})
+            return
+        }
         fetch(ENDPOINT + "/link", {
             method: "post",
             headers: {
@@ -166,7 +177,7 @@ class Link extends Component<IProps, IState> {
                             Create
                         </Button>
                         
-                        <Button variant="primary" type="reset" onClick={() => this.setState({isAddingLink: false})}>
+                        <Button variant="primary" type="reset" onClick={() => this.setState({isAddingLink: false, error:''})}>
                             Cancel
                         </Button>
                     </Form>

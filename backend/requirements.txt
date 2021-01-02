@@ -54,7 +54,6 @@ pytest-cov==2.10.1
 pytest-env==0.6.2
 pytest-flask==1.1.0
 pytest-randomly==3.5.0
-python-dotenv==0.15.0
 pytz==2020.5
 requests==2.25.1
 rsa==4.6

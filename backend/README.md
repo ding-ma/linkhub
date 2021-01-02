@@ -2,9 +2,12 @@
 To run the application, download a service account from Firebase and rename it to `serviceAccount.json`
 
 ## Environment Variables
-Rename `sample.env` to `.env`. There are two possible settings
-1. "TEST": This will use the Mock database
-1. "PROD": This will use the Firestore database.
+Change Env setting in `docker-compose.yml`
+1. _TEST_: This will use the Mock database (doesn't require Firebase account)
+1. _PROD_: This will use the Firestore database.
+
+## To run
+1. `docker-compose up --build`
 
 ## Workspace Endpoints
 ### Create Workspace
@@ -30,15 +33,19 @@ The `key` is unique to your workspace, share it with people you want to collabor
     "key": "WORKSPACE_KEY"
 }
 ```
+### Get Workspace name
+`GET /workspace?key=KEY_OF_WORKSPACE`
 
-## Link Endpoints
-### Get Links
-`GET /link`
+Return sample
 ```
 {
-    "key":"KEY_OF_WORKSPACE"
+    "name" : "NAME_OF_WORKSPACE"
 }
 ```
+## Link Endpoints
+### Get Links
+`GET /link?key=KEY_OF_WORKSPACE`
+
 Return sample
 ```
 {
@@ -49,8 +56,7 @@ Return sample
             "docID": "ID_OF_LINK"
         }
         {...}
-    ],
-    "workplace": "WORKSPACE_NAME"
+    ]
 }
 ```
 
@@ -64,7 +70,7 @@ Return sample
 }
 ```
 
-### Update Link
+### Update Link (Not supported on frontend)
 `PUT /link`
 ```
 {

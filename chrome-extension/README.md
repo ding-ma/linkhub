@@ -24,3 +24,8 @@
 2. Go to [_chrome://extensions_](chrome://extensions) in Google Chrome
 3. With the developer mode checkbox ticked, click **Load unpacked extension...** and select the _dist_ folder from this
    repo
+
+## To clear the workspace manually
+1. inspect popup
+1. click on application then local storage
+1. right click to clear the `chrome-extension://`

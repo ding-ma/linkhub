@@ -5,10 +5,8 @@ from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials
 from config import create_db
-from dotenv import load_dotenv
 import os
 
-load_dotenv('.env')
 cred = credentials.Certificate("serviceAccount.json")
 firebase_admin.initialize_app(cred)
 db = create_db()

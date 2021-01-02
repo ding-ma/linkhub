@@ -51,17 +51,15 @@ class AddWorkspace extends Component<IProps, IState> {
             .then(async r => {
                 if (r.ok) {
                     const key = await r.json()
-                    this.props.handler({addedWorkspace: {name: name, key: key['key']}, popupMode: EPopupModes.VIEW})
+                    this.props.handler({addedWorkspace: {name: name, key: key['key']}, popupMode: EPopupModes.VIEW, error: ''})
+                    Array.from(document.querySelectorAll("input")).forEach(
+                        input => (input.value = "")
+                    );
+                    this.setState({password: '', name: ''})
                 } else {
                     this.props.handler({error: await r.text()})
                 }
             })
-        
-        
-        Array.from(document.querySelectorAll("input")).forEach(
-            input => (input.value = "")
-        );
-        this.setState({password: '', name: ''})
     }
     
     
