@@ -4,10 +4,10 @@ import "./styles/Form.scss"
 import Link from "./components/Link";
 import Button from 'react-bootstrap/Button';
 import IWorkspace from "./interfaces/IWorkspace";
-import {Container, Form, FormControl, Navbar, NavDropdown} from "react-bootstrap";
+import {Container, Form, Navbar, NavDropdown} from "react-bootstrap";
 import AddWorkspace from "./components/AddWorkspace";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faClipboard, faMinusCircle, faTrash} from "@fortawesome/free-solid-svg-icons";
+import {faClipboard, faMinusCircle, faTrash,faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import {ENDPOINT} from "./environment";
 import EPopupModes from "./interfaces/EPopupModes";
 import IDeleteWorkspace from "./interfaces/IDeleteWorkspace";
@@ -90,14 +90,14 @@ class Popup extends Component<IProps, IState> {
     async submitAddWorkspace() {
         const toAdd = this.state.addWorkspace
         if (toAdd === "" || toAdd.length !== 11) {
-            this.setState({error: "cant be empty or length != 11"})
+            this.setState({error: "A workspace key is 11 in length"})
             return
         }
         
         const workspaces = []
         this.state.workspace.forEach(e => workspaces.push(e.key))
         if (workspaces.includes(toAdd)) {
-            this.setState({error: "this workspace is already added"})
+            this.setState({error: "This workspace is already added"})
             return
         }
         
@@ -210,7 +210,7 @@ class Popup extends Component<IProps, IState> {
                     </div>
                     
                     <div className="button-padding">
-                        <Button variant="outline-danger" size="sm" type="reset" onClick={() => this.setState({popupMode: EPopupModes.VIEW})}>
+                        <Button variant="outline-danger" size="sm" type="reset" onClick={() => this.setState({popupMode: EPopupModes.VIEW , error:''})}>
                             Cancel
                         </Button>
                     </div>
@@ -241,7 +241,7 @@ class Popup extends Component<IProps, IState> {
                     </div>
                     
                     <div className="button-padding">
-                        <Button  variant="outline-danger" size="sm" type="reset" onClick={() => this.setState({popupMode: EPopupModes.VIEW})}>
+                        <Button  variant="outline-danger" size="sm" type="reset" onClick={() => this.setState({popupMode: EPopupModes.VIEW, error:''})}>
                             Cancel
                         </Button>
                     </div>
@@ -284,7 +284,7 @@ class Popup extends Component<IProps, IState> {
                     
                     <div className="button-padding">
                         <Button variant="outline-danger" size="sm" type="reset"
-                                onClick={() => this.setState({popupMode: EPopupModes.VIEW})}>
+                                onClick={() => this.setState({popupMode: EPopupModes.VIEW , error:''})}>
                             Cancel
                         </Button>
                     </div>
@@ -333,7 +333,11 @@ class Popup extends Component<IProps, IState> {
                 {this.state.popupMode === EPopupModes.DELETE_PERM && deletePermanentView}
                 
                 {this.state.error !== '' &&
-                <span onClick={() => this.setState({error: ''})}>Error msg: {this.state.error}</span>}
+                    <div className="error-msg" onClick={() => this.setState({error: ''})}>
+                        <span >{this.state.error}   </span>
+                        <FontAwesomeIcon icon={faTimesCircle } size={"sm"}/>
+                    </div>
+                }
             </div>
         );
     }

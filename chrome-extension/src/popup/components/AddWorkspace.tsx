@@ -90,7 +90,7 @@ class AddWorkspace extends Component<IProps, IState> {
                     
                     <div className="button-padding">
                         <Button variant="outline-danger" size="sm" type="reset"
-                                onClick={() => this.props.handler({popupMode: EPopupModes.VIEW})}>
+                                onClick={() => this.props.handler({popupMode: EPopupModes.VIEW, error:''})}>
                             Cancel
                         </Button>
                     </div>

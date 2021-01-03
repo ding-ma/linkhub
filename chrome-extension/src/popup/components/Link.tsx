@@ -3,7 +3,7 @@ import ILink from "../interfaces/ILink";
 import {Button, Form} from "react-bootstrap";
 import PaginationList from 'react-pagination-list';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faPlusCircle, faTrash} from "@fortawesome/free-solid-svg-icons";
+import {faPlusCircle, faTimesCircle, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {ENDPOINT} from "../environment";
 import "../styles/Form.scss"
 import "../styles/Link.scss"
@@ -73,7 +73,7 @@ class Link extends Component<IProps, IState> {
     componentDidUpdate(prevProps: Readonly<IProps>, prevState: Readonly<IState>, snapshot?: any) {
         const wkKey = this.props.workSpaceKey
         if (prevProps.workSpaceKey !== wkKey) {
-            this.setState({loading: true})
+            this.setState({loading: true, isAddingLink: false, error: ''})
         }
         if (wkKey !== '' && this.state.loading) {
             this.fetchLinks()
@@ -128,7 +128,7 @@ class Link extends Component<IProps, IState> {
     
     displayNameOrLink(name: string, link: string): string {
         if (name === "") {
-            return link.length > 40 ? link.slice(0, 35) + "..." : link
+            return link.length > 40 ? link.slice(0, 40) + "..." : link
         }
         return name
     }
@@ -191,7 +191,12 @@ class Link extends Component<IProps, IState> {
                     
                     </Form>
                     {this.state.error !== '' &&
-                    <span onClick={() => this.setState({error: ''})}>Error msg: {this.state.error}</span>}
+                    <div className="error-msg" onClick={() => this.setState({error: ''})}>
+                        <span>{this.state.error}    </span>
+                        <FontAwesomeIcon icon={faTimesCircle} size={"sm"}/>
+
+                    </div>
+                    }
                 </div>
             )
         }
@@ -219,7 +224,6 @@ class Link extends Component<IProps, IState> {
                 </div>)
         }
         
-        //todo stick pagination on the bottom
         return (
             <div>
                 <PaginationList
@@ -232,7 +236,8 @@ class Link extends Component<IProps, IState> {
                             </div>
                             
                             <div className="link-icon">
-                                <FontAwesomeIcon icon={faTrash} onClick={(event) => this.handleDeleteLink(event, link)}/>
+                                <FontAwesomeIcon icon={faTrash}
+                                                 onClick={(event) => this.handleDeleteLink(event, link)}/>
                             </div>
                         </div>
                     )}
