@@ -1,0 +1,30 @@
+
+body {
+    margin: 0;
+}
+
+.popupContainer {
+    background-color: #f0f0f0;
+    color: black;
+    font-size: 20px;
+    height: 400px;
+    width: 500px;
+}
+
+.navbar-custom{
+    background-color: whitesmoke;
+}
+
+.modify{
+    display: inline-flex;
+    .icon-padding{
+        $paddingWidth: 10px;
+        padding-right: $paddingWidth;
+        padding-left: $paddingWidth;
+    }
+    .fa-icon{
+        &:active{
+            color: dodgerblue;
+        }
+    }
+}

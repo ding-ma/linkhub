@@ -3,8 +3,10 @@ import ILink from "../interfaces/ILink";
 import {Button, Form} from "react-bootstrap";
 import PaginationList from 'react-pagination-list';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faPen, faTrash} from "@fortawesome/free-solid-svg-icons";
+import {faPlusCircle, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {ENDPOINT} from "../environment";
+import "../styles/Form.scss"
+import "../styles/Link.scss"
 
 interface IProps {
     workSpaceKey: string
@@ -89,8 +91,8 @@ class Link extends Component<IProps, IState> {
         event.preventDefault()
         
         const {name, link} = this.state.addingLink
-        if (/\s/g.test(link)){
-            this.setState({error : "links can't contain white space"})
+        if (/\s/g.test(link)) {
+            this.setState({error: "links can't contain white space"})
             return
         }
         fetch(ENDPOINT + "/link", {
@@ -133,7 +135,7 @@ class Link extends Component<IProps, IState> {
     
     
     handleEditLink(event, toChange: ILink) {
-        //todo implemented later
+        //todo implemented later, use faPen
     }
     
     handleDeleteLink(event, toDelete: ILink) {
@@ -163,7 +165,8 @@ class Link extends Component<IProps, IState> {
     render() {
         if (this.state.isAddingLink) {
             return (
-                <div>
+                <div className="center-form">
+                    <h4>Add a link</h4>
                     <Form className="text-center" autoComplete={'off'}>
                         <Form.Group controlId="formBasicEmail">
                             <Form.Control type="text" placeholder="Link Name" onChange={this.nameHandler}/>
@@ -173,13 +176,19 @@ class Link extends Component<IProps, IState> {
                             <Form.Control type="text" placeholder="URL" onChange={this.urlHandler}/>
                         </Form.Group>
                         
-                        <Button variant="primary" type="submit" onClick={e => this.submitNewLink(e)}>
-                            Create
-                        </Button>
+                        <div className="button-padding">
+                            <Button variant="primary" size="sm" type="submit" onClick={e => this.submitNewLink(e)}>
+                                Create
+                            </Button>
+                        </div>
                         
-                        <Button variant="primary" type="reset" onClick={() => this.setState({isAddingLink: false, error:''})}>
-                            Cancel
-                        </Button>
+                        <div className="button-padding">
+                            <Button variant="outline-danger" size="sm" type="reset"
+                                    onClick={() => this.setState({isAddingLink: false, error: ''})}>
+                                Cancel
+                            </Button>
+                        </div>
+                    
                     </Form>
                     {this.state.error !== '' &&
                     <span onClick={() => this.setState({error: ''})}>Error msg: {this.state.error}</span>}
@@ -188,25 +197,26 @@ class Link extends Component<IProps, IState> {
         }
         
         const addLink = (
-            <div>
-                <Button onClick={() => this.setState({isAddingLink: true})}>Add new link</Button>
+            <div className="fixedbutton">
+                <FontAwesomeIcon icon={faPlusCircle} onClick={() => this.setState({isAddingLink: true})} size='lg'/>
             </div>
         )
         
         
         if (this.props.workSpaceKey === '') {
-            return <div>First select a workspace!</div>
+            return <div className="center-form">First select a workspace!</div>
         }
         
         if (this.state.loading) {
-            return <div>Loading your links</div>
+            return <div className="center-form">Loading your links</div>
         }
         
         if (!this.state.loading && this.state.links.length == 0) {
-            return (<div>
-                <div>No links found! Add some!</div>
-                {addLink}
-            </div>)
+            return (
+                <div className="center-form">
+                    <div>No links found! Add some!</div>
+                    {addLink}
+                </div>)
         }
         
         //todo stick pagination on the bottom
@@ -214,15 +224,13 @@ class Link extends Component<IProps, IState> {
             <div>
                 <PaginationList
                     data={this.state.links}
-                    pageSize={7}
+                    pageSize={9}
                     renderItem={(link: ILink) => (
                         <div key={link.docID}>
                             <a href={link.link} target="_blank"
                                key={link.docID}>{this.displayNameOrLink(link.name, link.link)}
                             </a>
                             
-                            {/*todo make it on hover only*/}
-                            {/*<FontAwesomeIcon icon={faPen} onClick={(event) => this.handleEditLink(event, link)}/>*/}
                             <FontAwesomeIcon icon={faTrash} onClick={(event) => this.handleDeleteLink(event, link)}/>
                         </div>
                     )}

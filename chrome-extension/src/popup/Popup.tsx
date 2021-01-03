@@ -1,5 +1,6 @@
 import React, {Component} from "react";
-import "./Popup.scss";
+import "./styles/Popup.scss";
+import "./styles/Form.scss"
 import Link from "./components/Link";
 import Button from 'react-bootstrap/Button';
 import IWorkspace from "./interfaces/IWorkspace";
@@ -192,8 +193,9 @@ class Popup extends Component<IProps, IState> {
     
     render() {
         
-        const deleteLocalView = (<div>
-                <h3>Deleting the workspace LOCALLY</h3>
+        const deleteLocalView = (
+            <div className="center-form">
+                <h4>Deleting the workspace LOCALLY</h4>
                 <Form className="text-center" autoComplete={'off'}>
                     <Form.Group controlId="formBasicEmail">
                         <Form.Control type="text" placeholder={"Retype (" + this.state.selectedWorkspace.name + ")"}
@@ -201,19 +203,25 @@ class Popup extends Component<IProps, IState> {
                         />
                     </Form.Group>
                     
-                    <Button variant="primary" type="submit" onClick={(e) => this.deleteWorkspaceLocal(e)}>
-                        Delete
-                    </Button>
+                    <div className="button-padding">
+                        <Button variant="primary" size="sm" type="submit" onClick={(e) => this.deleteWorkspaceLocal(e)}>
+                            Delete
+                        </Button>
+                    </div>
                     
-                    <Button variant="primary" type="reset" onClick={() => this.setState({popupMode: EPopupModes.VIEW})}>
-                        Cancel
-                    </Button>
+                    <div className="button-padding">
+                        <Button variant="outline-danger" size="sm" type="reset" onClick={() => this.setState({popupMode: EPopupModes.VIEW})}>
+                            Cancel
+                        </Button>
+                    </div>
+                    
                 </Form>
             </div>
         )
         
-        const deletePermanentView = (<div>
-                <h3>Deleting the workspace PERMANENTLY</h3>
+        const deletePermanentView = (
+            <div className="center-form">
+                <h4>Deleting the workspace PERMANENTLY</h4>
                 <Form className="text-center" autoComplete={'off'}>
                     <Form.Group controlId="formBasicEmail">
                         <Form.Control type="text" placeholder={"Retype (" + this.state.selectedWorkspace.name + ")"}
@@ -225,14 +233,19 @@ class Popup extends Component<IProps, IState> {
                         <Form.Control type="text" placeholder="Enter workspace Password"
                                       onChange={(e) => this.deleteWorkspacePwdHandler(e)}/>
                     </Form.Group>
+    
+                    <div className="button-padding">
+                        <Button variant="primary" size="sm" type="submit" onClick={(e) => this.deleteWorkspacePermanent(e)}>
+                            Delete
+                        </Button>
+                    </div>
                     
-                    <Button variant="primary" type="submit" onClick={(e) => this.deleteWorkspacePermanent(e)}>
-                        Delete
-                    </Button>
+                    <div className="button-padding">
+                        <Button  variant="outline-danger" size="sm" type="reset" onClick={() => this.setState({popupMode: EPopupModes.VIEW})}>
+                            Cancel
+                        </Button>
+                    </div>
                     
-                    <Button variant="primary" type="reset" onClick={() => this.setState({popupMode: EPopupModes.VIEW})}>
-                        Cancel
-                    </Button>
                 </Form>
             </div>
         )
@@ -240,28 +253,49 @@ class Popup extends Component<IProps, IState> {
         
         const deleteViewIcons = (this.state.selectedWorkspace.name === "" ? <div/> :
                 <div className="modify">
-                    <FontAwesomeIcon icon={faClipboard} onClick={this.copyToClipboard} className="fa-icon"/>
-                    <FontAwesomeIcon icon={faMinusCircle}
-                                     onClick={() => this.setState({popupMode: EPopupModes.DELETE_LOCAL})}/>
-                    <FontAwesomeIcon icon={faTrash}
-                                     onClick={() => this.setState({popupMode: EPopupModes.DELETE_PERM})}/>
+                    <div>
+                        <FontAwesomeIcon icon={faClipboard} onClick={this.copyToClipboard} className="fa-icon"/>
+                    </div>
+                    <div className="icon-padding">
+                        <FontAwesomeIcon icon={faMinusCircle}
+                                         onClick={() => this.setState({popupMode: EPopupModes.DELETE_LOCAL})}/>
+                    </div>
+                    <div>
+                        <FontAwesomeIcon icon={faTrash}
+                                         onClick={() => this.setState({popupMode: EPopupModes.DELETE_PERM})}/>
+                    </div>
                 </div>
         )
         
         const importWorkspaceView = (
-            <Form inline>
-                <FormControl type="text" placeholder="Workspace Key..." className="mr-sm-n1"
-                             onChange={this.addWorkspaceHandler}/>
-                <Button variant="outline-primary" onClick={() => this.submitAddWorkspace()}>Add</Button>
-                <Button variant="primary" type="reset" onClick={() => this.setState({popupMode: EPopupModes.VIEW})}>
-                    Cancel
-                </Button>
-            </Form>
+            <div className="center-form">
+                <h2>Import Workspace</h2>
+                <Form className="text-center" autoComplete={'off'}>
+    
+                    <Form.Group controlId="formBasicEmail">
+                        <Form.Control type="text" placeholder="Workspace Key (11 characters)" className="mr-sm-n1"
+                                      onChange={this.addWorkspaceHandler}/>
+                    </Form.Group>
+            
+                                 
+                    <div className="button-padding">
+                        <Button variant="primary" size="sm" onClick={() => this.submitAddWorkspace()}>Add</Button>
+                    </div>
+                    
+                    <div className="button-padding">
+                        <Button variant="outline-danger" size="sm" type="reset"
+                                onClick={() => this.setState({popupMode: EPopupModes.VIEW})}>
+                            Cancel
+                        </Button>
+                    </div>
+                    
+                </Form>
+            </div>
         )
         
         return (
             <div className="popupContainer">
-                <Navbar expand="lg" variant="light" bg="light">
+                <Navbar expand="lg" className="navbar-custom">
                     <Container>
                         
                         <NavDropdown

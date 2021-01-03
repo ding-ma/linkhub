@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import {Button, Form} from "react-bootstrap";
-import "./AddWorkspace.scss"
+import "../styles/Form.scss"
 import {ENDPOINT} from "../environment";
 import EPopupModes from "../interfaces/EPopupModes";
 import TPopupStates from "../interfaces/TPopupStates";
@@ -38,7 +38,7 @@ class AddWorkspace extends Component<IProps, IState> {
         event.preventDefault()
         
         const {name, password} = this.state
-        fetch(ENDPOINT+"/workspace", {
+        fetch(ENDPOINT + "/workspace", {
             method: "post",
             headers: {
                 'Content-Type': 'application/json',
@@ -51,7 +51,11 @@ class AddWorkspace extends Component<IProps, IState> {
             .then(async r => {
                 if (r.ok) {
                     const key = await r.json()
-                    this.props.handler({addedWorkspace: {name: name, key: key['key']}, popupMode: EPopupModes.VIEW, error: ''})
+                    this.props.handler({
+                        addedWorkspace: {name: name, key: key['key']},
+                        popupMode: EPopupModes.VIEW,
+                        error: ''
+                    })
                     Array.from(document.querySelectorAll("input")).forEach(
                         input => (input.value = "")
                     );
@@ -65,8 +69,8 @@ class AddWorkspace extends Component<IProps, IState> {
     
     render() {
         return (
-            <div>
-                <h3>Create a new workspace</h3>
+            <div className="center-form">
+                <h4>Create a new workspace</h4>
                 
                 <Form className="text-center" autoComplete={'off'}>
                     <Form.Group controlId="formBasicEmail">
@@ -78,13 +82,19 @@ class AddWorkspace extends Component<IProps, IState> {
                                       onChange={this.passwordHandler}/>
                     </Form.Group>
                     
-                    <Button variant="primary" type="submit" onClick={(e) => this.submitWorkspace(e)}>
-                        Create
-                    </Button>
+                    <div className="button-padding">
+                        <Button variant="primary" size="sm" type="submit" onClick={(e) => this.submitWorkspace(e)}>
+                            Create
+                        </Button>
+                    </div>
                     
-                    <Button variant="primary" type="reset" onClick={() => this.props.handler({popupMode: EPopupModes.VIEW})}>
-                        Cancel
-                    </Button>
+                    <div className="button-padding">
+                        <Button variant="outline-danger" size="sm" type="reset"
+                                onClick={() => this.props.handler({popupMode: EPopupModes.VIEW})}>
+                            Cancel
+                        </Button>
+                    </div>
+                    
                 </Form>
             </div>
         );
