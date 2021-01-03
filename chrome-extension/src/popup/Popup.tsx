@@ -253,14 +253,14 @@ class Popup extends Component<IProps, IState> {
         
         const deleteViewIcons = (this.state.selectedWorkspace.name === "" ? <div/> :
                 <div className="modify">
-                    <div>
+                    <div className="icon-cursor">
                         <FontAwesomeIcon icon={faClipboard} onClick={this.copyToClipboard} className="fa-icon"/>
                     </div>
-                    <div className="icon-padding">
+                    <div className="icon-padding icon-cursor">
                         <FontAwesomeIcon icon={faMinusCircle}
                                          onClick={() => this.setState({popupMode: EPopupModes.DELETE_LOCAL})}/>
                     </div>
-                    <div>
+                    <div className="icon-cursor">
                         <FontAwesomeIcon icon={faTrash}
                                          onClick={() => this.setState({popupMode: EPopupModes.DELETE_PERM})}/>
                     </div>

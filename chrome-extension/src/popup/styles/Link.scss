@@ -1,6 +1,6 @@
 .fixedbutton {
   position: fixed;
-  bottom: 10px;
+  bottom: 15px;
   right: 10px;
   color: dodgerblue;
 }
@@ -8,10 +8,33 @@
 .styles_kPagination__1qVvD {
   padding-left: 15px;
 
-  .styles_kPaginationListPage__2_6Ph{
+  .styles_kPaginationListPage__2_6Ph {
     position: fixed;
     bottom: 10px;
     right: 35%;
   }
 
+}
+
+
+.link-item {
+  &:hover {
+    background-color: whitesmoke;
+    cursor: pointer;
+
+    .link-icon {
+      display: inline-block;
+    }
+  }
+
+  .link-name {
+    display: inline-block;
+    width: 455px;
+    color: black;
+    text-decoration: underline;
+  }
+
+  .link-icon {
+    display: none;
+  }
 }

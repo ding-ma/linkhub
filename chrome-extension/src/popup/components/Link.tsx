@@ -197,7 +197,7 @@ class Link extends Component<IProps, IState> {
         }
         
         const addLink = (
-            <div className="fixedbutton">
+            <div className="fixedbutton icon-cursor">
                 <FontAwesomeIcon icon={faPlusCircle} onClick={() => this.setState({isAddingLink: true})} size='lg'/>
             </div>
         )
@@ -226,12 +226,14 @@ class Link extends Component<IProps, IState> {
                     data={this.state.links}
                     pageSize={9}
                     renderItem={(link: ILink) => (
-                        <div key={link.docID}>
-                            <a href={link.link} target="_blank"
-                               key={link.docID}>{this.displayNameOrLink(link.name, link.link)}
-                            </a>
+                        <div key={link.docID} className="link-item">
+                            <div onClick={() => window.open(link.link)} className="link-name">
+                                {this.displayNameOrLink(link.name, link.link)}
+                            </div>
                             
-                            <FontAwesomeIcon icon={faTrash} onClick={(event) => this.handleDeleteLink(event, link)}/>
+                            <div className="link-icon">
+                                <FontAwesomeIcon icon={faTrash} onClick={(event) => this.handleDeleteLink(event, link)}/>
+                            </div>
                         </div>
                     )}
                 />

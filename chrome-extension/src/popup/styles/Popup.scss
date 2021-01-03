@@ -1,4 +1,3 @@
-
 body {
     margin: 0;
 }
@@ -17,6 +16,7 @@ body {
 
 .modify{
     display: inline-flex;
+
     .icon-padding{
         $paddingWidth: 10px;
         padding-right: $paddingWidth;
@@ -27,4 +27,8 @@ body {
             color: dodgerblue;
         }
     }
+}
+
+.icon-cursor{
+    cursor: pointer;
 }
