@@ -5,6 +5,12 @@
 1. `npm install`
 1. `npm run dev`
 
+## Develop locally
+
+1. `npm install`
+1. `npm run watch`
+
+
 ## Run in Production
 
 1. rename `sample.env.prod` to `.env.prod`
@@ -12,11 +18,6 @@
 1. Follow instructions for backend in the backend folder   
 1. `npm install`
 1. `npm run build`
-
-## Develop locally
-
-1. `npm install`
-1. `npm run watch`
 
 ## Installation
 

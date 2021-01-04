@@ -20,6 +20,13 @@ interface IState {
     addingLink: ILink
 }
 
+let currentURL: string;
+
+chrome.tabs.query({'active': true, 'windowId': chrome.windows.WINDOW_ID_CURRENT},
+    function (tabs) {
+        currentURL = tabs[0].url
+    });
+
 
 class Link extends Component<IProps, IState> {
     constructor(props: IProps) {
@@ -29,7 +36,7 @@ class Link extends Component<IProps, IState> {
             loading: false,
             error: '',
             isAddingLink: false,
-            addingLink: {docID: '', link: '', name: ''}
+            addingLink: {docID: '', link: currentURL, name: ''}
         }
     }
     
@@ -87,6 +94,7 @@ class Link extends Component<IProps, IState> {
         return url;
     }
     
+    
     async submitNewLink(event) {
         event.preventDefault()
         
@@ -114,7 +122,7 @@ class Link extends Component<IProps, IState> {
                     this.setState({
                         links: [...this.state.links, doc],
                         isAddingLink: false,
-                        addingLink: {docID: '', link: '', name: ''}
+                        addingLink: {docID: '', link: currentURL, name: ''}
                     })
                     Array.from(document.querySelectorAll("input")).forEach(
                         input => (input.value = "")
@@ -173,7 +181,8 @@ class Link extends Component<IProps, IState> {
                         </Form.Group>
                         
                         <Form.Group controlId="formBasicPassword">
-                            <Form.Control type="text" placeholder="URL" onChange={this.urlHandler}/>
+                            <Form.Control type="text" placeholder="URL" onChange={this.urlHandler}
+                                          defaultValue={currentURL}/>
                         </Form.Group>
                         
                         <div className="button-padding">
